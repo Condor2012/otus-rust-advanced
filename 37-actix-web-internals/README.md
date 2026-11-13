@@ -1,4 +1,4 @@
-# actix-web под капотом — демо к занятию 37
+# actix-web под капотом — демо к занятию
 
 actix-web 4.17 · actix-http 3.19 · actix-server 2.10 · actix-ws 0.4 · Rust 1.97 (edition 2024).
 
