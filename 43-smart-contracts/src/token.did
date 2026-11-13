@@ -1,0 +1,8 @@
+type Result = variant { Ok : nat; Err : TokenError };
+type TokenError = variant { InsufficientBalance; NotAuthorized };
+
+service : (nat) -> {
+  balance_of : (opt principal) -> (nat) query;
+  mint : (principal, nat) -> (Result);
+  transfer : (principal, nat) -> (Result);
+}

@@ -1,0 +1,9 @@
+{
+    "canisters": {
+        "token": {
+            "package": "token",
+            "type": "rust",
+            "candid": "src/token.did"
+        }
+    }
+}

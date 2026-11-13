@@ -1,0 +1,13 @@
+[package]
+name = "token"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+candid = "0.10"
+ic-cdk = "0.20"
+ic-cdk-macros = "0.20"
+serde = "1.0"
+
+[lib]
+crate-type = ["cdylib"]
