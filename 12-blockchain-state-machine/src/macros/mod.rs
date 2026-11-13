@@ -50,7 +50,7 @@ macro_rules! block {
 
 /// Macro to create multiple extrinsics easily
 #[macro_export]
-macro_rules! extrinsics! {
+macro_rules! extrinsics {
     ($($caller:expr, $call:expr),* $(,)?) => {
         vec![
             $(
