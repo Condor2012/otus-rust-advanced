@@ -1,6 +1,3 @@
-use std::pin::Pin;
-use std::sync::{Arc, Mutex};
-
 use tasks_grpc::pb::task_service_server::{TaskService, TaskServiceServer};
 use tasks_grpc::pb::{
     CreateTaskRequest, GetTaskRequest, ListTasksRequest, ListTasksResponse, Task,
