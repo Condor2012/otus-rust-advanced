@@ -1,7 +1,0 @@
-[package]
-name = "use_dyn_lib_rt"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-libloading = "0.9.0"
