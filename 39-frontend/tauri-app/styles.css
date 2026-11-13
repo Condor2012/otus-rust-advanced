@@ -1,0 +1,9 @@
+body { font-family: system-ui, sans-serif; margin: 24px; background: #1c1b1a; color: #f2f2f2; }
+h1 { color: #f2a65a; margin-top: 0; }
+.card { background: #3a3632; border-radius: 10px; padding: 12px 18px; margin: 10px 0; }
+.card h2 { font-size: 15px; color: #9ca3af; margin: 0 0 6px; }
+button { background: #ce422b; color: #fff; border: 0; border-radius: 6px; padding: 6px 14px; font-size: 14px; cursor: pointer; }
+input { padding: 6px; font-size: 14px; margin-right: 8px; border-radius: 6px; border: 1px solid #555; background: #1c1b1a; color: #fff; }
+.error { color: #ff8a7a; }
+.tick { font-size: 32px; color: #8fcb9b; margin-left: 12px; vertical-align: middle; }
+code { color: #7dc4e4; }

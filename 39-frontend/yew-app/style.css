@@ -1,0 +1,9 @@
+body { font-family: system-ui, sans-serif; margin: 32px; background: #fafafa; color: #1c1b1a; }
+h1 { color: #ce422b; }
+.card { background: #fff; border-radius: 10px; padding: 16px 20px; margin: 12px 0; max-width: 480px; box-shadow: 0 1px 3px #0002; }
+.value { font-size: 28px; margin-left: 16px; vertical-align: middle; }
+button { background: #ce422b; color: #fff; border: 0; border-radius: 6px; padding: 6px 14px; font-size: 15px; cursor: pointer; }
+input { padding: 6px; font-size: 15px; margin-right: 8px; }
+li { cursor: pointer; padding: 4px 0; }
+li.done { text-decoration: line-through; color: #9ca3af; }
+.clock { color: #6b7280; }

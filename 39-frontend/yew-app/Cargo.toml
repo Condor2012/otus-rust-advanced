@@ -1,0 +1,20 @@
+[package]
+name = "yew-app"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+yew = { version = "0.23", features = ["csr"] }
+web-sys = { version = "0.3", features = ["HtmlInputElement"] }
+gloo-timers = "0.3"
+js-sys = "0.3"
+
+[dev-dependencies]
+yew = { version = "0.23", features = ["csr", "ssr"] }
+tokio = { version = "1", features = ["macros", "rt"] }
+
+[profile.release]
+opt-level = "z"   # размер важнее скорости: wasm качается по сети
+lto = true
+codegen-units = 1
+panic = "abort"
