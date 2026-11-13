@@ -30,9 +30,9 @@
 | Занятие | Тема | Код |
 |---|---|---|
 | 15 | Многопоточность без страха | — |
-| 16 | Пишем ThreadPool | [thr_pool](https://github.com/Condor2012/thr_pool) |
+| 16 | Пишем ThreadPool | [`16-thread-pool/`](16-thread-pool/) |
 | 17 | Асинхронный код | — |
-| 18 | Асинхронность под капотом | — |
+| 18 | Асинхронность под капотом | [`18-async-internals/`](18-async-internals/) |
 | 19 | Пишем чат | — |
 | 20 | Бонусное занятие. Практика разработки | — |
 | 21 | Консультация по домашним заданиям | — |
@@ -59,7 +59,7 @@
 | 32 | Теория FFI | — |
 | 33 | Практика FFI | — |
 | 34 | Консультация по домашним заданиям | — |
-| 35 | Backend #1 | [backends](https://github.com/Condor2012/backends) |
+| 35 | Backend #1 | [`35-backend-actix-axum-rocket/`](35-backend-actix-axum-rocket/) |
 | 36 | Backend #2 | — |
 | 37 | actix-web под капотом | — |
 | 38 | GUI | — |
