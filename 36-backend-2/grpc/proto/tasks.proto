@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package tasks.v1;
+
+service TaskService {
+  rpc CreateTask(CreateTaskRequest) returns (Task);
+  rpc GetTask(GetTaskRequest) returns (Task);
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse);
+  // серверный стрим: новые задачи по мере создания
+  rpc WatchTasks(WatchTasksRequest) returns (stream Task);
+}
+
+message Task {
+  int64 id = 1;
+  string title = 2;
+  bool done = 3;
+}
+
+message CreateTaskRequest { string title = 1; }
+message GetTaskRequest { int64 id = 1; }
+message ListTasksRequest {}
+message ListTasksResponse { repeated Task tasks = 1; }
+message WatchTasksRequest {}
