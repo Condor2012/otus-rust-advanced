@@ -1,0 +1,28 @@
+[package]
+name = "netchat-server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+name = "netchat_server"
+path = "src/lib.rs"
+
+[[bin]]
+name = "netchat-server"
+path = "src/main.rs"
+
+[dependencies]
+netchat-protocol = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+clap = { workspace = true }
+
+[dev-dependencies]
+netchat-protocol = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+anyhow = { workspace = true }
