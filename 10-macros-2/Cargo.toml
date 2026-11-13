@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "my_macros",
+    "use_my_macros",
+]
+
+resolver = "3"
