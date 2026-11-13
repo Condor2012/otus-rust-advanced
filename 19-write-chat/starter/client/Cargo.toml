@@ -1,0 +1,15 @@
+[package]
+name = "netchat-client"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "netchat-client"
+path = "src/main.rs"
+
+[dependencies]
+netchat-protocol = { workspace = true }
+tokio = { workspace = true }
+anyhow = { workspace = true }
+clap = { workspace = true }
