@@ -1,9 +1,0 @@
-[package]
-name = "errors_advanced"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-thiserror = "2.0.20"
-actix-web = "4.3.1"
-derive_more = "0.99.17"
