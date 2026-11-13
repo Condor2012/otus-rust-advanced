@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="utf-8"><title>wasm-bindgen demo</title>
+<style>body{font-family:sans-serif;margin:40px} #out{font-family:monospace;white-space:pre}</style></head>
+<body>
+  <h1>Rust → WebAssembly в браузере</h1>
+  <div id="list"></div>
+  <div id="out"></div>
+  <script type="module">
+    // --target web: init() скачивает и инстанцирует .wasm
+    import init, { greet, render_list, Counter, sum_primes } from "./pkg/wasm_lib.js";
+    await init();
+    const out = document.getElementById("out");
+    out.textContent += greet("браузер") + "\n";
+    render_list("list", ["создано", "из Rust", "через web-sys"]);
+    const c = new Counter(2n); c.increment(); c.increment();
+    out.textContent += "Counter.value = " + c.value + "\n";
+    const t = performance.now();
+    out.textContent += "sum_primes(1e7) = " + sum_primes(10_000_000) + " за " + (performance.now() - t).toFixed(0) + " мс\n";
+  </script>
+</body>
+</html>
