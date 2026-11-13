@@ -1,0 +1,4 @@
+[workspace]
+members = ["use_rust_lib", "use_static_lib", "use_dyn_lib", "my_lib", "use_dyn_lib_rt", "cjson-rs"]
+
+resolver = "3"
