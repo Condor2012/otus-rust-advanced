@@ -15,9 +15,9 @@
 | 3 | Организация проекта | [`03-project-organization/`](03-project-organization/) |
 | 4 | Владение и типы данных | [`04-ownership-data-types/`](04-ownership-data-types/) |
 | 5 | Заимствование, ссылки и слайсы | [`05-borrowing-references-slices/`](05-borrowing-references-slices/) |
-| 6 | Статический полиморфизм | — |
-| 7 | Динамический полиморфизм | — |
-| 8 | Статический и динамический полиморфизм. Практика | — |
+| 6 | Статический полиморфизм | [`06-static-polymorphism/`](06-static-polymorphism/) |
+| 7 | Динамический полиморфизм | [`07-dynamic-polymorphism/`](07-dynamic-polymorphism/) |
+| 8 | Статический и динамический полиморфизм. Практика | [`08-polymorphism-practice/`](08-polymorphism-practice/) |
 | 9 | Макросы | [`09-macros/`](09-macros/) |
 | 10 | Макросы. Часть 2 | [`10-macros-2/`](10-macros-2/) |
 | 11 | Стандартная библиотека | — |
