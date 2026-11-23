@@ -20,7 +20,7 @@
 | 8 | Статический и динамический полиморфизм. Практика | [`08-polymorphism-practice/`](08-polymorphism-practice/) |
 | 9 | Макросы | [`09-macros/`](09-macros/) |
 | 10 | Макросы. Часть 2 | [`10-macros-2/`](10-macros-2/) |
-| 11 | Стандартная библиотека | — |
+| 11 | Стандартная библиотека | [`11-standard-library/`](11-standard-library/) |
 | 12 | Практика Rust-разработки #1 | [`12-blockchain-state-machine/`](12-blockchain-state-machine/) |
 | 13 | Практика Rust-разработки #2 | [`13-transaction-entrypoint/`](13-transaction-entrypoint/) |
 | 14 | Консультация по домашним заданиям | [`14-error-handling/`](14-error-handling/) |
