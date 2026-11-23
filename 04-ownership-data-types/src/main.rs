@@ -1,52 +1,64 @@
 use std::fmt::Display;
 
-
 fn some_work(name: String) {
     println!("{name}");
 }
 
 fn some_work_2(age: u8) {
     println!("{age}");
-} 
+}
 
 fn main() {
-    let code = 403;
-    let response = request(code);
-    match response {
-        Response::ItsOk => println!("It's ok"),
-        Response::ItsNotOk => println!("It's not ok"),
-        Response::ItsNotOkWithReason(reason) => println!("It's not ok with reason: {reason}"),
-        Response::ItsNotOkWithReasonAndCode(reason, code) => println!("It's not ok with reason: {reason} and code: {code}"),
+    let response = request(403);
+    print_response(&response);
+
+    let statuses = [
+        Response::Ok,
+        Response::NotOk,
+        Response::NotOkWithReason("Unauthorized".to_string()),
+        Response::NotOkWithReasonAndCode("Forbidden".to_string(), 403),
+    ];
+    for status in &statuses {
+        print_response(status);
     }
-    let statuses: Vec<Response> = vec![Response::ItsOk, Response::ItsNotOk, Response::ItsNotOkWithReason("Unauthorized".to_string()), Response::ItsNotOkWithReasonAndCode("Forbidden".to_string(), 403)];
-    
-    let name: String = "Dima".to_string();
-    // name - no Copy (move the value)
+
+    // String не реализует Copy: clone создаёт независимую копию для some_work.
+    let name = "Dima".to_string();
     let name_2: &str = "Max";
-    // name - Copy (copy the value)
     some_work(name.clone());
     println!("Hello, {name_2}");
     println!("Hello, {name}");
 
+    // u8 реализует Copy, поэтому age доступен после вызова функции.
     let age: u8 = 30;
     some_work_2(age);
     println!("Age: {age}");
 
-
-    let pers_1 = Person {
+    let person = Person {
         name: "Dima".to_string(),
         age: 30,
         is_student: false,
     };
+    let new_student = teleport_person(create_person("Yura".to_string(), 30));
+    let another_person = Person::new("Alex".to_string(), 25);
 
-    let pers_2 = create_person("Yura".to_string(), 30);
+    println!("src person: {person}");
+    println!(
+        "new student: {new_student}, student: {}",
+        new_student.is_student
+    );
+    println!("another person: {another_person}");
+}
 
-    println!("src person: {pers_1}");
-    let new_student = teleport_person(pers_2);
-
-    let pers_3 = Person::new("Alex".to_string(), 25);
-
-    println!("new student: {new_student}");
+fn print_response(response: &Response) {
+    match response {
+        Response::Ok => println!("It's ok"),
+        Response::NotOk => println!("It's not ok"),
+        Response::NotOkWithReason(reason) => println!("It's not ok with reason: {reason}"),
+        Response::NotOkWithReasonAndCode(reason, code) => {
+            println!("It's not ok with reason: {reason} and code: {code}")
+        }
+    }
 }
 
 fn create_person(name: String, age: u8) -> Person {
@@ -72,7 +84,7 @@ impl Display for Person {
 
 impl Person {
     fn new(name: String, age: u8) -> Self {
-        Person {
+        Self {
             name,
             age,
             is_student: false,
@@ -81,31 +93,58 @@ impl Person {
 }
 
 fn teleport_person(person: Person) -> Person {
-    let new_pers = Person {
-        name: person.name,
-        age: person.age,
+    Person {
         is_student: true,
-    };
-    new_pers
+        ..person
+    }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 enum Response {
-    ItsOk,
-    ItsNotOk,
-    ItsNotOkWithReason(String),
-    ItsNotOkWithReasonAndCode(String, u16),
+    Ok,
+    NotOk,
+    NotOkWithReason(String),
+    NotOkWithReasonAndCode(String, u16),
 }
 
 fn request(code: u16) -> Response {
-    if code == 200 {
-        Response::ItsOk
-    } else if code == 400 {
-        Response::ItsNotOk
-    } else if code == 401 {
-        Response::ItsNotOkWithReason("Unauthorized".to_string())
-    } else if code == 403 {
-        Response::ItsNotOkWithReasonAndCode("Forbidden".to_string(), code)
-    } else {
-        Response::ItsNotOkWithReason("Unknown".to_string())
+    match code {
+        200 => Response::Ok,
+        400 => Response::NotOk,
+        401 => Response::NotOkWithReason("Unauthorized".to_string()),
+        403 => Response::NotOkWithReasonAndCode("Forbidden".to_string(), code),
+        _ => Response::NotOkWithReason("Unknown".to_string()),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Person, Response, create_person, request, teleport_person};
+
+    #[test]
+    fn maps_status_codes_to_responses() {
+        assert_eq!(request(200), Response::Ok);
+        assert_eq!(request(400), Response::NotOk);
+        assert_eq!(
+            request(403),
+            Response::NotOkWithReasonAndCode("Forbidden".to_string(), 403)
+        );
+    }
+
+    #[test]
+    fn teleports_person_and_makes_them_a_student() {
+        let person = teleport_person(create_person("Yura".to_string(), 30));
+
+        assert_eq!(person.name, "Yura");
+        assert_eq!(person.age, 30);
+        assert!(person.is_student);
+    }
+
+    #[test]
+    fn associated_constructor_creates_person() {
+        let person = Person::new("Alex".to_string(), 25);
+
+        assert_eq!(person.to_string(), "Alex is 25 year old");
+        assert!(!person.is_student);
     }
 }
