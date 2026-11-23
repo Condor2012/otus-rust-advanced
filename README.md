@@ -14,7 +14,7 @@
 | 2 | Модули, тесты и документация | [`02-modules-tests-docs/`](02-modules-tests-docs/) |
 | 3 | Организация проекта | [`03-project-organization/`](03-project-organization/) |
 | 4 | Владение и типы данных | [`04-ownership-data-types/`](04-ownership-data-types/) |
-| 5 | Заимствование, ссылки и слайсы | — |
+| 5 | Заимствование, ссылки и слайсы | [`05-borrowing-references-slices/`](05-borrowing-references-slices/) |
 | 6 | Статический полиморфизм | — |
 | 7 | Динамический полиморфизм | — |
 | 8 | Статический и динамический полиморфизм. Практика | — |
