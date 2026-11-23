@@ -1,0 +1,15 @@
+[package]
+name = "async-code"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = []
+tokio = ["dep:tokio"]
+
+[dependencies]
+tokio = { version = "1", features = ["macros", "rt", "time"], optional = true }
+
+[[example]]
+name = "tokio"
+required-features = ["tokio"]
