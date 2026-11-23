@@ -1,7 +1,6 @@
 use fp_oop::solid::{
     BankTransferProcessor, CreditCardProcessor, CryptoProcessor, Human, InMemoryUserRepository,
-    PaymentProcessor, Rectangle, RegisterData, Robot, Square, UserService, Workable,
-    print_area,
+    PaymentProcessor, Rectangle, RegisterData, Robot, Square, UserService, Workable, print_area,
 };
 
 fn main() {
