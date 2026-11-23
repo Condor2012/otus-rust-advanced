@@ -29,9 +29,9 @@
 
 | Занятие | Тема | Код |
 |---|---|---|
-| 15 | Многопоточность без страха | — |
+| 15 | Многопоточность без страха | [`15-fearless-concurrency/`](15-fearless-concurrency/) |
 | 16 | Пишем ThreadPool | [`16-thread-pool/`](16-thread-pool/) |
-| 17 | Асинхронный код | — |
+| 17 | Асинхронный код | [`17-async-code/`](17-async-code/) |
 | 18 | Асинхронность под капотом | [`18-async-internals/`](18-async-internals/) |
 | 19 | Пишем чат | [`19-write-chat/`](19-write-chat/) |
 | 20 | Бонусное занятие. Практика разработки | [`20-iterators-practice/`](20-iterators-practice/) |
