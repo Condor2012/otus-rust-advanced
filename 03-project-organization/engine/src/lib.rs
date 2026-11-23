@@ -7,4 +7,3 @@ pub fn roll20() -> u32 {
 pub fn roll20() -> u32 {
     20
 }
-
