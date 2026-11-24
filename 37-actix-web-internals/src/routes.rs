@@ -36,7 +36,9 @@ fn thread_name() -> String {
 async fn hits(req: HttpRequest, global: web::Data<Global>) -> impl Responder {
     let g = global.hits.fetch_add(1, Ordering::Relaxed) + 1;
     // app_data без Data<>: достаём !Send-тип напрямую.
-    let local = req.app_data::<PerWorker>().expect("PerWorker зарегистрирован");
+    let local = req
+        .app_data::<PerWorker>()
+        .expect("PerWorker зарегистрирован");
     local.hits.set(local.hits.get() + 1);
     HttpResponse::Ok().json(json!({
         "thread": thread_name(),

@@ -18,16 +18,19 @@ use routes::{Global, PerWorker};
 
 /// JsonConfig: маленький лимит + свой формат ошибки.
 fn json_cfg() -> web::JsonConfig {
-    web::JsonConfig::default().limit(1024).error_handler(|err, _req| {
-        let status = match &err {
-            error::JsonPayloadError::OverflowKnownLength { .. } | error::JsonPayloadError::Overflow { .. } => {
-                actix_web::http::StatusCode::PAYLOAD_TOO_LARGE
-            }
-            _ => actix_web::http::StatusCode::BAD_REQUEST,
-        };
-        let body = json!({ "error": err.to_string(), "code": status.as_u16() });
-        error::InternalError::from_response(err, HttpResponse::build(status).json(body)).into()
-    })
+    web::JsonConfig::default()
+        .limit(1024)
+        .error_handler(|err, _req| {
+            let status = match &err {
+                error::JsonPayloadError::OverflowKnownLength { .. }
+                | error::JsonPayloadError::Overflow { .. } => {
+                    actix_web::http::StatusCode::PAYLOAD_TOO_LARGE
+                }
+                _ => actix_web::http::StatusCode::BAD_REQUEST,
+            };
+            let body = json!({ "error": err.to_string(), "code": status.as_u16() });
+            error::InternalError::from_response(err, HttpResponse::build(status).json(body)).into()
+        })
 }
 
 /// Сборка приложения вынесена, чтобы тесты строили то же самое.
@@ -39,18 +42,25 @@ pub fn app_config(cfg: &mut web::ServiceConfig) {
 async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
-    let workers: usize = std::env::var("WORKERS").ok().and_then(|v| v.parse().ok()).unwrap_or(2);
+    let workers: usize = std::env::var("WORKERS")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(2);
     let addr = ("127.0.0.1", 8080);
 
     // Создаётся ОДИН раз: общий Arc на все воркеры.
-    let global = web::Data::new(Global { hits: AtomicU64::new(0) });
+    let global = web::Data::new(Global {
+        hits: AtomicU64::new(0),
+    });
 
     log::info!("main thread: {:?}", std::thread::current().name());
 
     HttpServer::new(move || {
         // Это замыкание вызывается в КАЖДОМ воркере.
         log::info!("App factory on {:?}", std::thread::current().name());
-        let per_worker = PerWorker { hits: Rc::new(Cell::new(0)) };
+        let per_worker = PerWorker {
+            hits: Rc::new(Cell::new(0)),
+        };
         App::new()
             .app_data(global.clone())
             .app_data(per_worker)
@@ -64,7 +74,7 @@ async fn main() -> std::io::Result<()> {
     .client_request_timeout(Duration::from_secs(2))
     .client_disconnect_timeout(Duration::from_secs(1))
     .shutdown_timeout(5)
-    .bind_auto_h2c(addr)?
+    .bind(addr)?
     .run()
     .await
 }
@@ -75,14 +85,21 @@ mod tests {
     use actix_web::{http::StatusCode, test};
 
     fn per_worker() -> PerWorker {
-        PerWorker { hits: Rc::new(Cell::new(0)) }
+        PerWorker {
+            hits: Rc::new(Cell::new(0)),
+        }
     }
 
     #[actix_web::test]
     async fn hits_counts_both_levels() {
-        let global = web::Data::new(Global { hits: AtomicU64::new(0) });
+        let global = web::Data::new(Global {
+            hits: AtomicU64::new(0),
+        });
         let app = test::init_service(
-            App::new().app_data(global.clone()).app_data(per_worker()).configure(app_config),
+            App::new()
+                .app_data(global.clone())
+                .app_data(per_worker())
+                .configure(app_config),
         )
         .await;
         for _ in 0..3 {
@@ -95,7 +112,10 @@ mod tests {
     #[actix_web::test]
     async fn notes_require_client_id() {
         let app = test::init_service(App::new().configure(app_config)).await;
-        let req = test::TestRequest::post().uri("/notes").set_json(json!({"text":"hi"})).to_request();
+        let req = test::TestRequest::post()
+            .uri("/notes")
+            .set_json(json!({"text":"hi"}))
+            .to_request();
         let res = test::call_service(&app, req).await;
         assert_eq!(res.status(), StatusCode::BAD_REQUEST);
     }
@@ -122,7 +142,8 @@ mod tests {
                 .configure(app_config),
         )
         .await;
-        let res = test::call_service(&app, test::TestRequest::get().uri("/fast").to_request()).await;
+        let res =
+            test::call_service(&app, test::TestRequest::get().uri("/fast").to_request()).await;
         assert!(res.headers().contains_key("x-request-id"));
         assert!(res.headers().contains_key("x-response-time-us"));
     }

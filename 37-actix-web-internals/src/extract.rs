@@ -17,10 +17,16 @@ impl FromRequest for ClientId {
         let res = match req.headers().get("x-client-id") {
             None => Err(ApiError::MissingClientId),
             Some(v) => match v.to_str() {
-                Ok(s) if !s.is_empty() && s.len() <= 32 && s.bytes().all(|b| b.is_ascii_alphanumeric()) => {
+                Ok(s)
+                    if !s.is_empty()
+                        && s.len() <= 32
+                        && s.bytes().all(|b| b.is_ascii_alphanumeric()) =>
+                {
                     Ok(ClientId(s.to_owned()))
                 }
-                _ => Err(ApiError::BadClientId(String::from_utf8_lossy(v.as_bytes()).into_owned())),
+                _ => Err(ApiError::BadClientId(
+                    String::from_utf8_lossy(v.as_bytes()).into_owned(),
+                )),
             },
         };
         ready(res)

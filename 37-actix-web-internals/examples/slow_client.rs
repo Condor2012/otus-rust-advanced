@@ -14,6 +14,10 @@ fn main() -> std::io::Result<()> {
     s.set_read_timeout(Some(Duration::from_secs(10)))?;
     let _ = s.read_to_end(&mut buf);
     let text = String::from_utf8_lossy(&buf);
-    println!("after {:.1?}: {}", started.elapsed(), text.lines().next().unwrap_or("<connection closed>"));
+    println!(
+        "after {:.1?}: {}",
+        started.elapsed(),
+        text.lines().next().unwrap_or("<connection closed>")
+    );
     Ok(())
 }

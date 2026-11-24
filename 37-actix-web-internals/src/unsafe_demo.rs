@@ -33,16 +33,16 @@ pub fn mask_align_to(buf: &mut [u8], mask: [u8; 4]) {
     mask_naive(suffix, m.to_ne_bytes());
 }
 
-/// Безопасная альтернатива: chunks_exact_mut + from_ne_bytes. Компилятор
+/// Безопасная альтернатива: as_chunks_mut + from_ne_bytes. Компилятор
 /// часто генерирует для неё такой же векторизованный код.
 pub fn mask_chunks(buf: &mut [u8], mask: [u8; 4]) {
     let m = u32::from_ne_bytes(mask);
-    let mut chunks = buf.chunks_exact_mut(4);
-    for c in &mut chunks {
-        let w = u32::from_ne_bytes([c[0], c[1], c[2], c[3]]) ^ m;
-        c.copy_from_slice(&w.to_ne_bytes());
+    let (chunks, remainder) = buf.as_chunks_mut::<4>();
+    for chunk in chunks {
+        let word = u32::from_ne_bytes(*chunk) ^ m;
+        *chunk = word.to_ne_bytes();
     }
-    mask_naive(chunks.into_remainder(), mask);
+    mask_naive(remainder, mask);
 }
 
 // ---------- 2. Заголовок без повторной валидации (как h1/encoder, h2/dispatcher) ----------
@@ -95,7 +95,11 @@ mod tests {
                 mask_align_to(&mut b[offset..offset + len], mask);
                 let mut c = src.to_vec();
                 mask_chunks(&mut c, mask);
-                assert_eq!(a, &b[offset..offset + len], "align_to off={offset} len={len}");
+                assert_eq!(
+                    a,
+                    &b[offset..offset + len],
+                    "align_to off={offset} len={len}"
+                );
                 assert_eq!(a, c, "chunks off={offset} len={len}");
             }
         }

@@ -48,7 +48,9 @@ where
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ready(Ok(RequestIdMw { service: Rc::new(service) }))
+        ready(Ok(RequestIdMw {
+            service: Rc::new(service),
+        }))
     }
 }
 
@@ -74,8 +76,10 @@ where
         let svc = Rc::clone(&self.service);
         Box::pin(async move {
             let mut res = svc.call(req).await?;
-            res.headers_mut()
-                .insert(HeaderName::from_static("x-request-id"), HeaderValue::from(id));
+            res.headers_mut().insert(
+                HeaderName::from_static("x-request-id"),
+                HeaderValue::from(id),
+            );
             Ok(res)
         })
     }
