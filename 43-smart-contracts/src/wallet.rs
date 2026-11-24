@@ -8,7 +8,7 @@ pub trait BalanceStorage {
 }
 
 pub struct Wallets<S> {
-    storage: S
+    storage: S,
 }
 
 impl<S: BalanceStorage> Wallets<S> {
@@ -29,5 +29,4 @@ impl<S: BalanceStorage> Wallets<S> {
     pub fn balance_of(&self, user: S::Id) -> S::Value {
         self.storage.balance_of(user)
     }
-
 }

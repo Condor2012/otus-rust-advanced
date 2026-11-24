@@ -7,7 +7,7 @@ use crate::wallet::BalanceStorage;
 
 thread_local! {
     static BALANCES: RefCell<HashMap<Principal, Nat>> = RefCell::new(HashMap::new());
-    static OWNER: RefCell<Principal> = RefCell::new(Principal::anonymous());
+    static OWNER: RefCell<Principal> = const { RefCell::new(Principal::anonymous()) };
 }
 
 #[derive(Default)]
