@@ -1,0 +1,20 @@
+[package]
+name = "utility-crates"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bincode = "2"
+bitflags = "2"
+bitvec = "1"
+bytemuck = { version = "1", features = ["derive"] }
+clap = { version = "4", features = ["derive"] }
+crossbeam = "0.8"
+glam = "0.30"
+nalgebra = "0.34"
+nom = "8"
+rand = "0.9"
+rayon = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+smallvec = "1"
