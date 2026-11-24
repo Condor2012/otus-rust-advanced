@@ -39,7 +39,6 @@ unit! {
     Hour => "h";
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -83,8 +82,6 @@ mod tests {
 
         assert_eq!(result, "1.1km");
     }
-
-
 
     #[test]
     fn second_ops() {
