@@ -94,7 +94,7 @@ pub enum WebhookEvent {
 
 // ------------------------------------------------- 4.5 Sealed trait
 mod sealed {
-    pub trait Sealed { }
+    pub trait Sealed {}
 }
 
 /// Трейт можно реализовать только внутри крейта: реализации не разъедутся,
@@ -139,7 +139,10 @@ pub mod good_api {
 
     impl Ledger {
         pub fn new() -> Self {
-            Self { entries: Vec::new(), balance: 0 }
+            Self {
+                entries: Vec::new(),
+                balance: 0,
+            }
         }
         pub fn push(&mut self, delta: i64) {
             self.entries.push(delta);
@@ -169,7 +172,10 @@ mod tests {
     fn thiserror_messages() {
         let e = capture(1, 10, 100).unwrap_err();
         assert_eq!(e.to_string(), "insufficient funds: need 100, available 10");
-        assert!(matches!(capture(0, 0, 0), Err(PaymentError::NotFound { id: 0 })));
+        assert!(matches!(
+            capture(0, 0, 0),
+            Err(PaymentError::NotFound { id: 0 })
+        ));
     }
 
     #[test]

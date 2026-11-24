@@ -13,7 +13,14 @@ pub fn new_client_v1(
     follow_redirects: bool,
     user_agent: Option<String>,
 ) -> HttpClient {
-    HttpClient { endpoint, timeout_ms, retries, verify_tls, follow_redirects, user_agent }
+    HttpClient {
+        endpoint,
+        timeout_ms,
+        retries,
+        verify_tls,
+        follow_redirects,
+        user_agent,
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -94,7 +101,10 @@ pub enum PaymentState {
 
 impl PaymentDyn {
     pub fn new(id: u64) -> Self {
-        Self { id, state: PaymentState::Draft }
+        Self {
+            id,
+            state: PaymentState::Draft,
+        }
     }
     pub fn authorize(&mut self) -> Result<(), &'static str> {
         if self.state != PaymentState::Draft {
@@ -124,19 +134,31 @@ pub struct PaymentT<S> {
 
 impl PaymentT<Draft> {
     pub fn new(id: u64) -> Self {
-        Self { id, _state: PhantomData }
+        Self {
+            id,
+            _state: PhantomData,
+        }
     }
     pub fn authorize(self) -> PaymentT<Authorized> {
-        PaymentT { id: self.id, _state: PhantomData }
+        PaymentT {
+            id: self.id,
+            _state: PhantomData,
+        }
     }
 }
 
 impl PaymentT<Authorized> {
     pub fn capture(self) -> PaymentT<Captured> {
-        PaymentT { id: self.id, _state: PhantomData }
+        PaymentT {
+            id: self.id,
+            _state: PhantomData,
+        }
     }
     pub fn void(self) -> PaymentT<Draft> {
-        PaymentT { id: self.id, _state: PhantomData }
+        PaymentT {
+            id: self.id,
+            _state: PhantomData,
+        }
     }
 }
 
@@ -284,11 +306,17 @@ mod tests {
 
     #[test]
     fn guard_closes_on_early_return() {
-        let mut m = Metrics { open_transactions: 0, log: vec![] };
+        let mut m = Metrics {
+            open_transactions: 0,
+            log: vec![],
+        };
         let _ = with_transaction_v1(&mut m, true);
         assert_eq!(m.open_transactions, 1); // утечка
 
-        let mut m2 = Metrics { open_transactions: 0, log: vec![] };
+        let mut m2 = Metrics {
+            open_transactions: 0,
+            log: vec![],
+        };
         let _ = with_transaction_v2(&mut m2, true);
         assert_eq!(m2.open_transactions, 0); // баланс сохранён
     }

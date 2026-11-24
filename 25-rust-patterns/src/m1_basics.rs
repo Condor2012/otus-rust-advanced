@@ -140,7 +140,9 @@ pub fn mask_card_v1(number: String) -> String {
 
 /// Идиоматично: &str принимает и String, и литерал, и срез.
 pub fn mask_card_v2(number: &str) -> String {
-    let tail = number.get(number.len().saturating_sub(4)..).unwrap_or(number);
+    let tail = number
+        .get(number.len().saturating_sub(4)..)
+        .unwrap_or(number);
     format!("**** **** **** {}", tail)
 }
 
@@ -211,7 +213,10 @@ mod tests {
 
     #[test]
     fn option_versions_agree() {
-        let u = User { id: 1, email: Some("a@b.com".into()) };
+        let u = User {
+            id: 1,
+            email: Some("a@b.com".into()),
+        };
         assert_eq!(email_domain_v1(&u), "b.com");
         assert_eq!(email_domain_v2(&u), Some("b.com"));
     }
@@ -226,9 +231,21 @@ mod tests {
     #[test]
     fn totals_agree() {
         let ps = vec![
-            Payment { amount: 100, status: Status::Paid, provider: "acme".into() },
-            Payment { amount: 50, status: Status::Pending, provider: "acme".into() },
-            Payment { amount: 70, status: Status::Paid, provider: "globex".into() },
+            Payment {
+                amount: 100,
+                status: Status::Paid,
+                provider: "acme".into(),
+            },
+            Payment {
+                amount: 50,
+                status: Status::Pending,
+                provider: "acme".into(),
+            },
+            Payment {
+                amount: 70,
+                status: Status::Paid,
+                provider: "globex".into(),
+            },
         ];
         assert_eq!(paid_total_v1(&ps), 170);
         assert_eq!(paid_total_v2(&ps), 170);

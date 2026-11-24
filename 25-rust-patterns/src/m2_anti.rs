@@ -66,7 +66,9 @@ pub struct Settings {
 
 impl Settings {
     pub fn new() -> Self {
-        Self { values: HashMap::new() }
+        Self {
+            values: HashMap::new(),
+        }
     }
 
     /// Анти-паттерн: библиотека решает за приложение, что программе пора умереть.
@@ -269,7 +271,10 @@ mod tests {
     fn newtype_transfer() {
         let a = AccountId::new("acc-1").unwrap();
         let b = AccountId::new("acc-2").unwrap();
-        let m = Money { minor_units: 100, currency: Currency::Usdt };
+        let m = Money {
+            minor_units: 100,
+            currency: Currency::Usdt,
+        };
         assert_eq!(transfer_v2(&a, &b, m), Ok(()));
         assert_eq!(transfer_v2(&a, &a, m), Err(TransferError::SameAccount));
         assert!(AccountId::new("").is_none());
@@ -285,19 +290,31 @@ mod tests {
     #[test]
     fn counting_and_joining() {
         let orders = vec![
-            Order { id: 1, lines: vec!["a".into(), "b".into()] },
-            Order { id: 2, lines: vec!["c".into()] },
+            Order {
+                id: 1,
+                lines: vec!["a".into(), "b".into()],
+            },
+            Order {
+                id: 2,
+                lines: vec!["c".into()],
+            },
         ];
         assert_eq!(count_lines_v2(&orders), 3);
         assert_eq!(count_lines_v1(orders.clone()), 3);
-        assert_eq!(join_v1(&["x".to_string(), "y".to_string()]), join_v2(&["x".to_string(), "y".to_string()]));
+        assert_eq!(
+            join_v1(&["x".to_string(), "y".to_string()]),
+            join_v2(&["x".to_string(), "y".to_string()])
+        );
     }
 
     #[test]
     fn tree_rename() {
         let mut root = Node {
             name: "root".into(),
-            children: vec![Node { name: "child".into(), children: vec![] }],
+            children: vec![Node {
+                name: "child".into(),
+                children: vec![],
+            }],
         };
         rename_all_v2(&mut root, "!");
         assert_eq!(root.name, "root!");
@@ -313,20 +330,36 @@ mod tests {
     struct VecLedger(Vec<String>);
     impl Ledger for VecLedger {
         fn record(&mut self, from: &AccountId, to: &AccountId, amount: Money) {
-            self.0.push(format!("{}->{}:{}", from.as_str(), to.as_str(), amount.minor_units));
+            self.0.push(format!(
+                "{}->{}:{}",
+                from.as_str(),
+                to.as_str(),
+                amount.minor_units
+            ));
         }
     }
 
     #[test]
     fn service_is_testable_without_db() {
         let mut svc = TransferService::new(
-            MemRepo(Money { minor_units: 1_000, currency: Currency::Usdt }),
+            MemRepo(Money {
+                minor_units: 1_000,
+                currency: Currency::Usdt,
+            }),
             VecLedger(Vec::new()),
         );
         let a = AccountId::new("a").unwrap();
         let b = AccountId::new("b").unwrap();
-        assert!(svc
-            .execute(&a, &b, Money { minor_units: 500, currency: Currency::Usdt })
-            .is_ok());
+        assert!(
+            svc.execute(
+                &a,
+                &b,
+                Money {
+                    minor_units: 500,
+                    currency: Currency::Usdt
+                }
+            )
+            .is_ok()
+        );
     }
 }
