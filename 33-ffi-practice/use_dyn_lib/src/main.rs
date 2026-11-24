@@ -1,3 +1,5 @@
+use my_lib as _;
+
 #[link(name = "my_lib", kind = "dylib")]
 unsafe extern "C" {
     fn add(left: u64, right: u64) -> u64;

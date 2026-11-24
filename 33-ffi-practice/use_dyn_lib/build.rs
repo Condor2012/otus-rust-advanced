@@ -1,4 +1,8 @@
+use std::path::PathBuf;
+
 fn main() {
-    // println!("cargo:rustc-link-lib=dylib=my_lib");
-    println!("cargo:rustc-link-search=target/debug");
+    let target = std::env::var_os("CARGO_TARGET_DIR")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("../target"));
+    println!("cargo:rustc-link-search={}/debug", target.display());
 }
