@@ -69,7 +69,7 @@ pub fn simple_debug(input: TokenStream) -> TokenStream {
         }
         syn::Fields::Unnamed(fields_unnamed) => {
             let fields_len = fields_unnamed.unnamed.len();
-            let indice = (0..fields_len).map(|i| syn::Index::from(i));
+            let indice = (0..fields_len).map(syn::Index::from);
             quote! {
                 impl std::fmt::Debug for #struct_name {
                     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -83,7 +83,7 @@ pub fn simple_debug(input: TokenStream) -> TokenStream {
                     }
                 }
             }
-        },
+        }
         syn::Fields::Unit => {
             quote! {
                 impl std::fmt::Debug for #struct_name {
@@ -92,7 +92,7 @@ pub fn simple_debug(input: TokenStream) -> TokenStream {
                     }
                 }
             }
-        },
+        }
     };
 
     expanded.into()

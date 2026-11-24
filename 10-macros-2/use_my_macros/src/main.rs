@@ -1,11 +1,13 @@
 use my_macros::{SimpleDebug, log_call, say_hello};
 
 fn main() {
-    // say_hello_example();
+    say_hello_example();
+    println!("my_function returned {}", my_function());
 
-    // my_function();
-
-    let cat = Cat { name: "Whiskers".to_string(), age: 3 };
+    let cat = Cat {
+        name: "Whiskers".to_string(),
+        age: 3,
+    };
     println!("{cat:?}");
 
     let p = Point(1.0, 2.0);
@@ -30,7 +32,7 @@ fn my_function() -> i32 {
 #[derive(SimpleDebug)]
 struct Cat {
     name: String,
-    age: u32
+    age: u32,
 }
 
 #[derive(SimpleDebug)]
