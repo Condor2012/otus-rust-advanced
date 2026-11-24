@@ -9,7 +9,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // подписываемся на стрим в отдельной задаче
     let mut watcher = client.clone();
     let watch = tokio::spawn(async move {
-        let mut stream = watcher.watch_tasks(WatchTasksRequest {}).await?.into_inner();
+        let mut stream = watcher
+            .watch_tasks(WatchTasksRequest {})
+            .await?
+            .into_inner();
         for _ in 0..2 {
             if let Some(task) = stream.message().await? {
                 println!("[watch] new task: {task:?}");
@@ -21,13 +24,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     for title in ["Изучить tonic", "Написать proto"] {
         let task = client
-            .create_task(CreateTaskRequest { title: title.into() })
+            .create_task(CreateTaskRequest {
+                title: title.into(),
+            })
             .await?
             .into_inner();
         println!("created: {task:?}");
     }
 
-    let err = client.get_task(GetTaskRequest { id: 42 }).await.unwrap_err();
+    let err = client
+        .get_task(GetTaskRequest { id: 42 })
+        .await
+        .unwrap_err();
     assert_eq!(err.code(), Code::NotFound);
     println!("get 42: {:?} / {}", err.code(), err.message());
 

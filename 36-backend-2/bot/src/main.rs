@@ -1,9 +1,11 @@
+// Макрос teloxide 0.17 генерирует ветку, которую Rust 1.100 помечает
+// как unreachable. Разрешение относится только к этому файлу с командами.
+#![allow(unreachable_code)]
+
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-use teloxide::{
-    dispatching::dialogue::InMemStorage, prelude::*, utils::command::BotCommands,
-};
+use teloxide::{dispatching::dialogue::InMemStorage, prelude::*, utils::command::BotCommands};
 
 #[derive(BotCommands, Clone, Debug, PartialEq)]
 #[command(rename_rule = "lowercase", description = "Команды бота задач:")]
@@ -32,7 +34,13 @@ type MyDialogue = Dialogue<State, InMemStorage<State>>;
 type Store = Arc<Mutex<HashMap<ChatId, Vec<(String, bool)>>>>;
 type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
 
-async fn on_command(bot: Bot, msg: Message, cmd: Command, store: Store, dialogue: MyDialogue) -> HandlerResult {
+async fn on_command(
+    bot: Bot,
+    msg: Message,
+    cmd: Command,
+    store: Store,
+    dialogue: MyDialogue,
+) -> HandlerResult {
     let chat = msg.chat.id;
     let text = match cmd {
         Command::Help => Command::descriptions().to_string(),
@@ -40,11 +48,14 @@ async fn on_command(bot: Bot, msg: Message, cmd: Command, store: Store, dialogue
         Command::Add(title) => {
             dialogue.update(State::Default).await?;
             add_task(&store, chat, title)
-        } 
+        }
         Command::List => list_tasks(&store, chat),
         Command::Done(n) => {
             let mut store = store.lock().unwrap();
-            match store.get_mut(&chat).and_then(|t| t.get_mut(n.wrapping_sub(1))) {
+            match store
+                .get_mut(&chat)
+                .and_then(|t| t.get_mut(n.wrapping_sub(1)))
+            {
                 Some(task) => {
                     task.1 = true;
                     format!("Готово: {}", task.0)
@@ -74,7 +85,8 @@ async fn on_title(bot: Bot, msg: Message, store: Store, dialogue: MyDialogue) ->
             dialogue.exit().await?;
         }
         None => {
-            bot.send_message(msg.chat.id, "Пришлите название текстом").await?;
+            bot.send_message(msg.chat.id, "Пришлите название текстом")
+                .await?;
         }
     }
     Ok(())
@@ -105,7 +117,8 @@ fn echo(msg: Message) -> String {
     format!("🤖 {text}")
 }
 
-fn schema() -> teloxide::dispatching::UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>> {
+fn schema()
+-> teloxide::dispatching::UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'static>> {
     use teloxide::dispatching::dialogue;
 
     let commands = teloxide::filter_command::<Command, _>().endpoint(on_command);
@@ -140,8 +153,14 @@ mod tests {
 
     #[test]
     fn parses_commands() {
-        assert_eq!(Command::parse("/add купить молоко", "tasks_bot").unwrap(), Command::Add("купить молоко".into()));
-        assert_eq!(Command::parse("/done 2", "tasks_bot").unwrap(), Command::Done(2));
+        assert_eq!(
+            Command::parse("/add купить молоко", "tasks_bot").unwrap(),
+            Command::Add("купить молоко".into())
+        );
+        assert_eq!(
+            Command::parse("/done 2", "tasks_bot").unwrap(),
+            Command::Done(2)
+        );
         assert!(Command::parse("/done два", "tasks_bot").is_err());
     }
 

@@ -1,8 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use async_graphql::{
-    Context, ID, Object, Schema, SimpleObject, Subscription,
-    http::GraphiQLSource,
+    Context, ID, Object, Schema, SimpleObject, Subscription, http::GraphiQLSource,
 };
 use async_graphql_axum::{GraphQL, GraphQLSubscription};
 use axum::{Router, response::Html, routing::get};
@@ -42,7 +41,13 @@ impl Query {
 
     async fn task(&self, ctx: &Context<'_>, id: ID) -> Option<Task> {
         let store = ctx.data_unchecked::<Store>();
-        store.tasks.lock().unwrap().iter().find(|t| t.id == id).cloned()
+        store
+            .tasks
+            .lock()
+            .unwrap()
+            .iter()
+            .find(|t| t.id == id)
+            .cloned()
     }
 }
 
@@ -57,7 +62,11 @@ impl Mutation {
         let store = ctx.data::<Store>()?;
         let task = {
             let mut tasks = store.tasks.lock().unwrap();
-            let task = Task { id: ID::from(tasks.len() + 1), title, done: false };
+            let task = Task {
+                id: ID::from(tasks.len() + 1),
+                title,
+                done: false,
+            };
             tasks.push(task.clone());
             task
         };
@@ -88,7 +97,10 @@ type TasksSchema = Schema<Query, Mutation, Subscription>;
 
 fn schema() -> TasksSchema {
     let (events, _) = broadcast::channel(64);
-    let store = Store { tasks: Default::default(), events };
+    let store = Store {
+        tasks: Default::default(),
+        events,
+    };
     Schema::build(Query, Mutation, Subscription)
         .data(store)
         .limit_depth(5) // защита от слишком глубоких запросов
@@ -110,7 +122,10 @@ async fn main() {
     std::fs::write("schema.graphql", schema.sdl()).unwrap();
 
     let app = Router::new()
-        .route("/", get(graphiql).post_service(GraphQL::new(schema.clone())))
+        .route(
+            "/",
+            get(graphiql).post_service(GraphQL::new(schema.clone())),
+        )
         .route_service("/ws", GraphQLSubscription::new(schema));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();

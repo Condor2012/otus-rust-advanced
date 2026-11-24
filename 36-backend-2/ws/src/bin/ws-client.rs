@@ -9,7 +9,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // stdin -> сервер
     tokio::spawn(async move {
-        let mut lines = tokio::io::AsyncBufReadExt::lines(tokio::io::BufReader::new(tokio::io::stdin()));
+        let mut lines =
+            tokio::io::AsyncBufReadExt::lines(tokio::io::BufReader::new(tokio::io::stdin()));
         while let Ok(Some(line)) = lines.next_line().await {
             let msg = format!("{name}: {line}");
             if write.send(Message::Text(msg.into())).await.is_err() {

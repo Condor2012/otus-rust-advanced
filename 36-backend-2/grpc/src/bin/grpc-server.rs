@@ -1,7 +1,11 @@
+use std::{
+    pin::Pin,
+    sync::{Arc, Mutex},
+};
+
 use tasks_grpc::pb::task_service_server::{TaskService, TaskServiceServer};
 use tasks_grpc::pb::{
-    CreateTaskRequest, GetTaskRequest, ListTasksRequest, ListTasksResponse, Task,
-    WatchTasksRequest,
+    CreateTaskRequest, GetTaskRequest, ListTasksRequest, ListTasksResponse, Task, WatchTasksRequest,
 };
 use tokio::sync::broadcast;
 use tokio_stream::{Stream, StreamExt, wrappers::BroadcastStream};
@@ -22,7 +26,11 @@ impl TaskService for Tasks {
         }
         let task = {
             let mut store = self.store.lock().unwrap();
-            let task = Task { id: store.len() as i64 + 1, title, done: false };
+            let task = Task {
+                id: store.len() as i64 + 1,
+                title,
+                done: false,
+            };
             store.push(task.clone());
             task
         };
@@ -65,7 +73,10 @@ impl TaskService for Tasks {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (events, _) = broadcast::channel(64);
-    let svc = Tasks { store: Default::default(), events };
+    let svc = Tasks {
+        store: Default::default(),
+        events,
+    };
 
     let addr = "0.0.0.0:50051".parse()?;
     println!("gRPC server on {addr}");
