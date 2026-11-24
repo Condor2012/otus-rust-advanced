@@ -92,3 +92,22 @@ cargo run
 ```bash
 cargo run --example <имя>
 ```
+
+Точные команды и необходимые внешние службы или системные библиотеки указаны
+в README соответствующего занятия. Учебная заготовка `19-write-chat/starter`
+намеренно содержит `todo!()`: её проверяют через `cargo check --workspace`,
+а тесты запускают в `middle/` и `final/`.
+
+## Проверка качества
+
+Для отдельного crate:
+
+```bash
+cargo fmt --all -- --check
+cargo test --all-targets
+cargo clippy --all-targets --all-features -- -D warnings
+```
+
+Для workspace тесты и Clippy запускаются с `--workspace`. Каталоги `target/`,
+`dist/` и файлы `Cargo.lock` не публикуются: проекты являются учебными
+примерами, а не библиотеками с зафиксированным набором зависимостей.
