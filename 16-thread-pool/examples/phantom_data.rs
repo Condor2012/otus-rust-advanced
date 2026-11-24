@@ -4,9 +4,9 @@ use std::marker::PhantomData;
 use std::rc::Rc;
 
 fn main() {
-    let a = BytesRepr::<u32>{
+    let a = BytesRepr::<u32> {
         bytes: 42u32.to_be_bytes().to_vec(),
-        p: PhantomData
+        p: PhantomData,
     };
 }
 

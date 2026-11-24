@@ -79,7 +79,7 @@ impl Actor for PingActor {
 
     fn process_message(self, msg: Self::Message) -> Option<Self> {
         let str = msg.into_string();
-        println!("ping with message: {}", str);
+        println!("{}: ping with message: {}", self.0, str);
         self.1.send(PongMessage::new(str)).ok()?;
         Some(self)
     }
@@ -112,7 +112,7 @@ impl Actor for PongActor {
 
     fn process_message(self, msg: Self::Message) -> Option<Self> {
         let str = msg.into_string();
-        println!("pong with message: {}", str);
+        println!("{}: pong with message: {}", self.0, str);
         Some(self)
     }
 }

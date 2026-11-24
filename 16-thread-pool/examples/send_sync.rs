@@ -4,25 +4,25 @@ use std::marker::PhantomData;
 use std::rc::Rc;
 
 fn main() {
-    // Структуры с `Send + Sync` полями `Send + Sync`.
+    // Структуры с `Send + Sync` полями сами реализуют `Send + Sync`.
     assert_send::<BothStruct>();
     assert_sync::<BothStruct>();
 
-    // `RefCell: Send+!Sync`
+    // `RefCell<T>: Send`, если `T: Send`, но никогда не реализует `Sync`.
     assert_send::<RefCell<()>>();
-    assert_sync::<RefCell<()>>();
 
-    // `&RefCell: !Send+!Sync`
-    assert_send::<&RefCell<()>>();
-    assert_sync::<&RefCell<()>>();
+    // Следующие проверки намеренно оставлены в комментариях: это негативные
+    // примеры, и раскомментирование любой из них должно вызвать ошибку компиляции.
+    //
+    // assert_sync::<RefCell<()>>();       // RefCell<()>: !Sync
+    // assert_send::<&RefCell<()>>();      // &RefCell<()>: !Send
+    // assert_sync::<&RefCell<()>>();      // &RefCell<()>: !Sync
+    // assert_send::<Rc<()>>();            // Rc<()>: !Send
+    // assert_sync::<Rc<()>>();            // Rc<()>: !Sync
+    // assert_send::<NeitherStruct>();     // PhantomData<Rc<()>> запрещает Send
+    // assert_sync::<NeitherStruct>();     // и Sync
 
-    // `Rc: !Send+!Sync`
-    assert_send::<Rc<()>>();
-    assert_sync::<Rc<()>>();
-
-    // Структуры с `!Send + !Sync` полями `!Send + !Sync`.
-    assert_send::<NeitherStruct>();
-    assert_sync::<NeitherStruct>();
+    println!("Положительные проверки прошли; негативные примеры — в комментариях.");
 }
 
 fn assert_send<T: Send>() {}
@@ -37,6 +37,7 @@ struct BothStruct {
 }
 
 #[derive(Default)]
+#[allow(dead_code)]
 struct NeitherStruct {
     _p: PhantomData<Rc<()>>,
 }

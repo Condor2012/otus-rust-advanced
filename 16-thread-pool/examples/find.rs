@@ -1,5 +1,5 @@
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
-use std::sync::{mpsc, Arc};
+use std::sync::{Arc, mpsc};
 use std::thread;
 use std::time::{Duration, Instant};
 use thr_pool::ThreadPool;
