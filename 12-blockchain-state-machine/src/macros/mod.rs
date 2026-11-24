@@ -2,7 +2,7 @@
 #[macro_export]
 macro_rules! extrinsic {
     ($caller:expr, $call:expr) => {
-        crate::types::Extrinsic {
+        $crate::types::Extrinsic {
             caller: $caller,
             call: $call,
         }
@@ -13,7 +13,7 @@ macro_rules! extrinsic {
 #[macro_export]
 macro_rules! transfer_call {
     ($to:expr, $amount:expr) => {
-        crate::RuntimeCall::Balances(crate::balances::Call::Transfer {
+        $crate::RuntimeCall::Balances($crate::balances::Call::Transfer {
             to: $to,
             amount: $amount,
         })
@@ -24,12 +24,12 @@ macro_rules! transfer_call {
 #[macro_export]
 macro_rules! poe_call {
     (create, $claim:expr) => {
-        crate::RuntimeCall::ProofOfExistance(crate::proof_of_existance::Call::Create {
+        $crate::RuntimeCall::ProofOfExistance($crate::proof_of_existance::Call::Create {
             claim: $claim,
         })
     };
     (revoke, $claim:expr) => {
-        crate::RuntimeCall::ProofOfExistance(crate::proof_of_existance::Call::Revoke {
+        $crate::RuntimeCall::ProofOfExistance($crate::proof_of_existance::Call::Revoke {
             claim: $claim,
         })
     };
@@ -39,8 +39,8 @@ macro_rules! poe_call {
 #[macro_export]
 macro_rules! block {
     ($block_number:expr, $extrinsics:expr) => {
-        crate::types::Block {
-            header: crate::types::Header {
+        $crate::types::Block {
+            header: $crate::types::Header {
                 block_number: $block_number,
             },
             extrinsics: $extrinsics,
@@ -54,7 +54,7 @@ macro_rules! extrinsics {
     ($($caller:expr, $call:expr),* $(,)?) => {
         vec![
             $(
-                crate::extrinsic!($caller, $call),
+                $crate::extrinsic!($caller, $call),
             )*
         ]
     };

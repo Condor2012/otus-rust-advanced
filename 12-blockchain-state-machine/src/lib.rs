@@ -97,6 +97,40 @@ impl Runtime {
     }
 }
 
+pub fn demo() -> Runtime {
+    let mut runtime = Runtime::new();
+
+    let user_1 = account!("Yuriy");
+    let user_2 = account!("Evgeny");
+    let user_3 = account!("Azat");
+
+    runtime.balances.set_balance(&user_1, 100);
+
+    let block_1 = block!(
+        1,
+        extrinsics!(
+            user_1.clone(),
+            transfer_call!(user_2.clone(), 30),
+            user_1.clone(),
+            transfer_call!(user_3.clone(), 20)
+        )
+    );
+
+    let block_2 = block!(
+        2,
+        extrinsics!(
+            user_2.clone(),
+            transfer_call!(user_3.clone(), 10),
+            user_3.clone(),
+            transfer_call!(user_1.clone(), 20)
+        )
+    );
+
+    runtime.execute_block(block_1).unwrap();
+    runtime.execute_block(block_2).unwrap();
+    runtime
+}
+
 pub struct Transaction {
     sender: types::AccountId,
     receiver: types::AccountId,
@@ -132,13 +166,24 @@ pub fn init_system() -> TransactionService {
     }
 }
 
-pub fn listener(service: &mut TransactionService, name_sender: String, name_receiver: String, amount: u128) -> Result<(), String> {
+impl TransactionService {
+    pub fn users(&self) -> &[types::AccountId] {
+        &self.users
+    }
+}
+
+pub fn listener(
+    service: &mut TransactionService,
+    name_sender: String,
+    name_receiver: String,
+    amount: u128,
+) -> Result<(), String> {
     service.queue.push(Transaction {
         sender: name_sender,
         receiver: name_receiver,
         amount,
     });
-    
+
     if service.queue.len() == 5 {
         let block = block!(
             1,
@@ -155,8 +200,11 @@ pub fn listener(service: &mut TransactionService, name_sender: String, name_rece
                 transfer_call!(service.queue[4].receiver.clone(), service.queue[4].amount)
             )
         );
-        
-        service.runtime.execute_block(block).map_err(|e| e.to_string())?;
+
+        service
+            .runtime
+            .execute_block(block)
+            .map_err(|e| e.to_string())?;
         service.queue.clear();
     }
 
