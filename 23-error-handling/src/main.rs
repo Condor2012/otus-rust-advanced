@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt};
 
 #[derive(Debug)]
 enum Error {
@@ -6,12 +6,13 @@ enum Error {
     NegativeNumber,
 }
 
-impl ToString for Error {
-    fn to_string(&self) -> String {
-        match self {
-            Error::DivisionByZero => "Division by zero error".to_string(),
-            Error::NegativeNumber => "Negative number error".to_string(),
-        }
+impl fmt::Display for Error {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let message = match self {
+            Error::DivisionByZero => "Division by zero error",
+            Error::NegativeNumber => "Negative number error",
+        };
+        formatter.write_str(message)
     }
 }
 
@@ -54,7 +55,6 @@ fn get_user_id(user_name: &str) -> Option<String> {
     None
 }
 
-
 fn main() {
     // match do_some_work() {
     //     Ok(result) => println!("{}", result),
@@ -62,13 +62,13 @@ fn main() {
     // };
     // println!("Result is {}", do_some_work().unwrap_or("Oh oh oh".to_string()));
     if let Ok(rrr) = do_some_work() {
-       println!("Result is {}", rrr);
+        println!("Result is {}", rrr);
     }
-    
+
     if let Some(id) = get_user_id("admin") {
         println!("User id is {}", id);
     }
-    
+
     // let id = get_user_id("admin");
     println!("Hello, world!");
 }
