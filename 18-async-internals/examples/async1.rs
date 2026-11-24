@@ -1,5 +1,8 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
+// Ручная сигнатура здесь является предметом демонстрации: ниже та же
+// асинхронная операция расписана как конечный автомат с явным `poll`.
+#![allow(clippy::manual_async_fn)]
 
 use std::{pin::Pin, task::Poll};
 
@@ -35,7 +38,6 @@ fn another() -> impl Future<Output = ()> {
     }
 }
 
-
 /// псевдокод функции приведённой выше в представлении StateMachine которое использует компилятор
 /// для генерации исполняемого кода
 fn state_machine() -> impl Future<Output = ()> {
@@ -67,7 +69,10 @@ enum StateMachine {
 impl Future for StateMachine {
     type Output = ();
 
-    fn poll(mut self: Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> std::task::Poll<Self::Output> {
+    fn poll(
+        mut self: Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Self::Output> {
         loop {
             match &mut *self {
                 StateMachine::Start => {
@@ -75,43 +80,52 @@ impl Future for StateMachine {
                     *self = StateMachine::ReadingFile1(future);
                 }
 
-                StateMachine::ReadingFile1(future) => {
-                    match future.as_mut().poll(cx) {
-                        Poll::Ready(Ok(content1)) => {
-                            let future = Box::pin(fs::read_to_string("file2.txt"));
-                            *self = StateMachine::ReadingFile2 { content1, future };
-                        }
-                        Poll::Ready(Err(_)) => panic!("Ошибка чтения file1.txt"),
-                        Poll::Pending => return Poll::Pending,
+                StateMachine::ReadingFile1(future) => match future.as_mut().poll(cx) {
+                    Poll::Ready(Ok(content1)) => {
+                        let future = Box::pin(fs::read_to_string("file2.txt"));
+                        *self = StateMachine::ReadingFile2 { content1, future };
                     }
-                }
+                    Poll::Ready(Err(_)) => panic!("Ошибка чтения file1.txt"),
+                    Poll::Pending => return Poll::Pending,
+                },
 
-                StateMachine::ReadingFile2 { content1, future } => {
-                    match future.as_mut().poll(cx) {
-                        Poll::Ready(Ok(content2)) => {
-                            let content1 = std::mem::take(content1);
-                            let future = Box::pin(fs::read_to_string("file3.txt"));
-                            *self = StateMachine::ReadingFile3 { content1, content2, future }
+                StateMachine::ReadingFile2 { content1, future } => match future.as_mut().poll(cx) {
+                    Poll::Ready(Ok(content2)) => {
+                        let content1 = std::mem::take(content1);
+                        let future = Box::pin(fs::read_to_string("file3.txt"));
+                        *self = StateMachine::ReadingFile3 {
+                            content1,
+                            content2,
+                            future,
                         }
-                        Poll::Ready(Err(_)) => panic!("Ошибка чтения file2.txt"),
-                        Poll::Pending => return Poll::Pending,
                     }
-                }
+                    Poll::Ready(Err(_)) => panic!("Ошибка чтения file2.txt"),
+                    Poll::Pending => return Poll::Pending,
+                },
 
-                StateMachine::ReadingFile3 { content1, content2, future } => {
-                    match future.as_mut().poll(cx) {
-                        Poll::Ready(Ok(content3)) => {
-                            let content1 = std::mem::take(content1);
-                            let content2 = std::mem::take(content2);
-                            *self = StateMachine::Printing { content1, content2, content3 }
-
+                StateMachine::ReadingFile3 {
+                    content1,
+                    content2,
+                    future,
+                } => match future.as_mut().poll(cx) {
+                    Poll::Ready(Ok(content3)) => {
+                        let content1 = std::mem::take(content1);
+                        let content2 = std::mem::take(content2);
+                        *self = StateMachine::Printing {
+                            content1,
+                            content2,
+                            content3,
                         }
-                        Poll::Ready(Err(_)) => panic!("Ошибка чтения file3.txt"),
-                        Poll::Pending => return Poll::Pending,
                     }
-                }
+                    Poll::Ready(Err(_)) => panic!("Ошибка чтения file3.txt"),
+                    Poll::Pending => return Poll::Pending,
+                },
 
-                StateMachine::Printing { content1, content2, content3 } => {
+                StateMachine::Printing {
+                    content1,
+                    content2,
+                    content3,
+                } => {
                     println!(
                         "Прочитано: {} байт, {} байт, {} байт",
                         content1.len(),

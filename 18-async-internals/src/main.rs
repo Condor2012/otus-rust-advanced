@@ -1,6 +1,9 @@
-use std::path::{self, Path};
+use std::path::Path;
 
-use tokio::{fs::File, io::{AsyncWriteExt, BufWriter}};
+use tokio::{
+    fs::File,
+    io::{AsyncWriteExt, BufWriter},
+};
 
 const TARGET_SIZE: usize = 100 * 1024 * 1024; // 100 Mbytes
 const BUFFER_SIZE: usize = 1024 * 1024; // 1 Mbytes
@@ -36,11 +39,7 @@ async fn generate_large_file(filename: &Path) -> std::io::Result<()> {
 
 #[tokio::main]
 async fn main() {
-    let test_files = [
-        "file1.txt",
-        "file2.txt",
-        "file3.txt",
-    ];
+    let test_files = ["file1.txt", "file2.txt", "file3.txt"];
 
     let mut join_handlers = vec![];
 
