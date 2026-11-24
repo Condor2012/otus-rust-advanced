@@ -3,9 +3,13 @@ use std::{sync::Arc, time::Instant};
 use rand::{RngExt as _, SeedableRng, rngs::SmallRng};
 use wgpu::util::DeviceExt as _;
 use winit::{
-    application::ApplicationHandler, dpi::LogicalSize, event::WindowEvent, event_loop::EventLoop, keyboard::{KeyCode, PhysicalKey}, window::Window,
+    application::ApplicationHandler,
+    dpi::LogicalSize,
+    event::WindowEvent,
+    event_loop::EventLoop,
+    keyboard::{KeyCode, PhysicalKey},
+    window::Window,
 };
-
 
 const W: f32 = 480.0;
 const H: f32 = 720.0;
@@ -89,8 +93,13 @@ impl Game {
     fn fill_platforms(&mut self) {
         while self.platforms.last().unwrap().y < self.camera + H + PLATFORM_SPAWN_MARGIN {
             let last = self.platforms.last().unwrap();
-            let step = self.rng.random_range(-PLATFORM_MAX_STEP..=PLATFORM_MAX_STEP) as f32;
-            self.platforms.push(Platform { x: (last.x + step).clamp(0.0, W - PLATFORM_W), y: last.y + PLATFORM_SPACING});
+            let step = self
+                .rng
+                .random_range(-PLATFORM_MAX_STEP..=PLATFORM_MAX_STEP) as f32;
+            self.platforms.push(Platform {
+                x: (last.x + step).clamp(0.0, W - PLATFORM_W),
+                y: last.y + PLATFORM_SPACING,
+            });
         }
     }
 
@@ -109,7 +118,7 @@ impl Game {
                     let x = self.x + offset;
                     x + PLAYER_W / 2.0 > platform.x && x - PLAYER_W / 2.0 < platform.x + PLATFORM_W
                 });
-                if old_y >= platform.y && self.y <= platform.y && overlaps{
+                if old_y >= platform.y && self.y <= platform.y && overlaps {
                     self.y = platform.y;
                     self.vy = JUMP;
                     break;
@@ -118,7 +127,8 @@ impl Game {
         }
         self.camera = self.camera.max(self.y - H * CAMERA_FOLLOW_HEIGHT);
         self.score = self.score.max((self.y - START_Y).max(0.0) as u32);
-        self.platforms.retain(|p| p.y > self.camera - PLATFORM_CULL_MARGIN);
+        self.platforms
+            .retain(|p| p.y > self.camera - PLATFORM_CULL_MARGIN);
         self.fill_platforms();
         self.over = self.y < self.camera - GAME_OVER_MARGIN;
     }
@@ -218,7 +228,6 @@ struct Vertex {
 
 struct Renderer {
     window: Arc<Window>,
-    instance: wgpu::Instance,
     device: wgpu::Device,
     surface: wgpu::Surface<'static>,
     pipeline: wgpu::RenderPipeline,
@@ -256,33 +265,40 @@ impl Renderer {
             source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
         });
 
-        let pipeline: wgpu::RenderPipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-            label: None,
-            layout: None,
-            vertex: wgpu::VertexState {
-                 module: &shader,
-                 entry_point: Some("vs_main"),
-                 compilation_options: Default::default(),
-                buffers: &[Some(wgpu::VertexBufferLayout {
-                    array_stride: size_of::<Vertex>() as u64,
-                    step_mode: wgpu::VertexStepMode::Vertex,
-                    attributes: &wgpu::vertex_attr_array![0 => Float32x2, 1 => Float32x3],
-                })],
-            },
-            primitive: Default::default(),
-            depth_stencil: None,
-            multisample: Default::default(),
-            fragment: Some(wgpu::FragmentState {
-                module: &shader,
-                entry_point: Some("fs_main"),
-                compilation_options: Default::default(),
-                targets: &[Some(config.format.into())],
-            }),
-            multiview_mask: None,
-            cache: None,
-        });
+        let pipeline: wgpu::RenderPipeline =
+            device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                label: None,
+                layout: None,
+                vertex: wgpu::VertexState {
+                    module: &shader,
+                    entry_point: Some("vs_main"),
+                    compilation_options: Default::default(),
+                    buffers: &[Some(wgpu::VertexBufferLayout {
+                        array_stride: size_of::<Vertex>() as u64,
+                        step_mode: wgpu::VertexStepMode::Vertex,
+                        attributes: &wgpu::vertex_attr_array![0 => Float32x2, 1 => Float32x3],
+                    })],
+                },
+                primitive: Default::default(),
+                depth_stencil: None,
+                multisample: Default::default(),
+                fragment: Some(wgpu::FragmentState {
+                    module: &shader,
+                    entry_point: Some("fs_main"),
+                    compilation_options: Default::default(),
+                    targets: &[Some(config.format.into())],
+                }),
+                multiview_mask: None,
+                cache: None,
+            });
 
-        Renderer { window, instance, surface, pipeline, queue, device }
+        Renderer {
+            window,
+            surface,
+            pipeline,
+            queue,
+            device,
+        }
     }
 
     fn draw(&mut self, game: &Game) {
@@ -321,9 +337,7 @@ impl Renderer {
         self.window.pre_present_notify();
         self.queue.present(frame);
     }
-
 }
-
 
 struct App {
     renderer: Option<Renderer>,
@@ -349,7 +363,7 @@ impl ApplicationHandler for App {
     fn window_event(
         &mut self,
         event_loop: &winit::event_loop::ActiveEventLoop,
-        window_id: winit::window::WindowId,
+        _window_id: winit::window::WindowId,
         event: WindowEvent,
     ) {
         match event {
@@ -358,7 +372,8 @@ impl ApplicationHandler for App {
                 let now = Instant::now();
                 let dt = (now - self.last_frame).as_secs_f32().min(MAX_FRAME_DT);
                 self.last_frame = now;
-                self.game.update(dt, self.right as u8 as f32 - self.left as u8 as f32);
+                self.game
+                    .update(dt, self.right as u8 as f32 - self.left as u8 as f32);
                 if let Some(render) = &mut self.renderer {
                     render.draw(&self.game);
                 }
@@ -371,7 +386,7 @@ impl ApplicationHandler for App {
                     PhysicalKey::Code(KeyCode::Escape) if pressed => event_loop.exit(),
                     _ => {}
                 }
-            },
+            }
             _ => (),
         }
     }
