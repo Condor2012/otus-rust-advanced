@@ -1,6 +1,4 @@
 use thiserror::Error;
-use std::fmt;
-use derive_more::{Display, From};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SeverityLevel {
@@ -9,7 +7,7 @@ pub enum SeverityLevel {
     Error,
 }
 
-#[derive(Debug, Error, Display, From)]
+#[derive(Debug, Error)]
 #[non_exhaustive]
 pub enum TransactionError {
     #[error("Insufficient funds")]
@@ -18,55 +16,37 @@ pub enum TransactionError {
     InvalidInput,
 }
 
-
-#[derive(Debug, Error, Display, From)]
+#[derive(Debug, Error)]
 #[non_exhaustive]
-pub enum UserError<MyType> {
+pub enum Error {
     #[error("Invalid input: {field}")]
-    InvalidInput { field: MyType },
+    InvalidInput { field: String },
     #[error("User with id not found")]
     NotFound,
-    #[error("IO error: {1}")]
-    AlreadyExists (i32, String),
+    #[error("User already exists: {1} ({0})")]
+    AlreadyExists(i32, String),
     #[error("IO error: {0}")]
-    IoError(std::io::Error),
+    Io(#[from] std::io::Error),
     #[error("Service error")]
     BadService,
     #[error("Custom error: {0}")]
     Custom(String),
     #[error("Another custom error: {0}")]
     AnotherCustom(String),
+    #[error(transparent)]
+    Transaction(#[from] TransactionError),
 }
 
 impl Error {
     pub fn retryable(&self) -> bool {
-        match self {
-            Error::IoError(_) => true,
-            Error::BadService => true,
-            Error::Custom(_) => true,
-            _ => false,
-        }
-    }    
+        matches!(self, Self::Io(_) | Self::BadService | Self::Custom(_))
+    }
 
     pub fn severity_level(&self) -> SeverityLevel {
         match self {
-            Error::InvalidInput { .. } => SeverityLevel::Warning,
-            Error::NotFound => SeverityLevel::Error,
-            Error::AlreadyExists(_, _) => SeverityLevel::Error,
-            Error::IoError(_) => SeverityLevel::Error,
-            Error::BadService => SeverityLevel::Error,
-            Error::Custom(_) => SeverityLevel::Error,
-            Error::AnotherCustom(_) => SeverityLevel::Error,
+            Self::InvalidInput { .. } => SeverityLevel::Warning,
+            Self::Transaction(TransactionError::InvalidInput) => SeverityLevel::Info,
+            _ => SeverityLevel::Error,
         }
-    }
-}
-
-pub enum SystemError {
-    ServiceError(actix_web::Error),
-}
-
-impl From<TransactionError> for Error {
-    fn from(error: TransactionError) -> Self {
-        Error::TransactionError(error)
     }
 }

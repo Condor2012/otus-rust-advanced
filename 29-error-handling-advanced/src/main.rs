@@ -1,95 +1,79 @@
-mod errors;
-use errors::Error;
-
-use crate::errors::UserError;
-
-fn do_something_good() -> Result<(), Error> {
-    Ok(())
-}
+use errors_advanced::errors::{Error, SeverityLevel, TransactionError};
 
 #[derive(Debug)]
 struct User {
     id: u32,
     name: String,
-    age: u8,
-    email: String,
 }
 
-impl User {
-    fn new(id: u32, name: String, age: u8, email: String) -> Self {
-        Self {
-            id,
-            name,
-            age,
-            email,
-        }
-    }
-
-}
-
+#[derive(Default)]
 struct Service {
     users: Vec<User>,
 }
-impl Service {
-    fn new() -> Self {
-        Self {
-            users: vec![],
-        }
-    }
 
+impl Service {
     fn add_user(&mut self, user: User) {
         self.users.push(user);
     }
-    
-    fn get_user(&self, id: u32) -> Option<&User> {
-        self.users.iter().find(|user| user.id == id)
-    }
-    
+
     fn get_user_mut(&mut self, id: u32) -> Result<&mut User, Error> {
         if id == 0 {
-            return Err(Error::InvalidInput { field: "id".to_string() });
+            return Err(Error::InvalidInput {
+                field: "id".to_string(),
+            });
         }
-        // if let Err(error) = db.init().connect() {
-        //     Err(Error::IoError(error))
-        // }
-        match self.users.iter_mut().find(|user| user.id == id) {
-            Some(user) => Ok(user),
-            None => Err(Error::NotFound),
-        }
+        self.users
+            .iter_mut()
+            .find(|user| user.id == id)
+            .ok_or(Error::NotFound)
     }
-}
-
-fn do_something_bad(num: i32) {
-    let mut service = Service::new();
-    let user = User::new(1, "John".to_string(), 30, "john@example.com".to_string());
-    service.add_user(user);
-    
-    if num % 2 == 0 {
-        panic!("Something bad happened");
-    }
-}
-
-async fn do_something_async() -> Result<(), TransactionError> {
-    service.do_something_async_first().await?;
-    // VVVVVVVV <- cancelation()
-    service.do_something_async_second().await?;
-    Ok(())
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let hook = std::panic::take_hook();
-    std::panic::set_hook(Box::new(|info| {
-        hook(info);
-        logger.log(SeverityLevel::Error, info);
-        
+    let previous_hook = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        eprintln!("{:?}: {info}", SeverityLevel::Error);
+        previous_hook(info);
     }));
-    let mut service = Service::new();
-    let user = User::new(1, "John".to_string(), 30, "john@example.com".to_string());
-    service.add_user(user);
-    let user = service.get_user(1)?;
 
-    let thread = std::thread::Builder::new().name("worker_wallet_yield").spawn(|user| {*user.balance *= 1.01});
+    let mut service = Service::default();
+    service.add_user(User {
+        id: 1,
+        name: "John".to_string(),
+    });
+    let user = service.get_user_mut(1)?;
+    println!("User {}: {}", user.id, user.name);
 
-    println!("User: {:?}", user);
+    let transaction_error = Error::from(TransactionError::InsufficientFunds);
+    println!(
+        "{transaction_error}; retryable = {}, severity = {:?}",
+        transaction_error.retryable(),
+        transaction_error.severity_level()
+    );
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn errors_expose_retry_and_severity_contracts() {
+        let input = Error::InvalidInput {
+            field: "id".to_string(),
+        };
+        assert!(!input.retryable());
+        assert_eq!(input.severity_level(), SeverityLevel::Warning);
+        assert!(Error::BadService.retryable());
+        assert!(Error::Io(std::io::Error::other("тест")).retryable());
+
+        let variants = [
+            Error::AlreadyExists(1, "John".to_string()),
+            Error::Custom("повторить".to_string()),
+            Error::AnotherCustom("не повторять".to_string()),
+            Error::from(TransactionError::InvalidInput),
+        ];
+        assert_eq!(variants[3].severity_level(), SeverityLevel::Info);
+        assert_eq!(variants.len(), 4);
+    }
 }
