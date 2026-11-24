@@ -50,7 +50,11 @@ impl Reducible for Todos {
         match action {
             TodoAction::Add(text) => {
                 next_id += 1;
-                items.push(Todo { id: next_id, text, done: false });
+                items.push(Todo {
+                    id: next_id,
+                    text,
+                    done: false,
+                });
             }
             TodoAction::Toggle(id) => {
                 if let Some(t) = items.iter_mut().find(|t| t.id == id) {
@@ -84,7 +88,11 @@ pub fn TodoItem(props: &TodoItemProps) -> Html {
 pub fn TodoList() -> Html {
     let todos = use_reducer(|| Todos {
         next_id: 1,
-        items: vec![Todo { id: 1, text: "Собрать wasm".into(), done: true }],
+        items: vec![Todo {
+            id: 1,
+            text: "Собрать wasm".into(),
+            done: true,
+        }],
     });
     let input = use_node_ref();
 

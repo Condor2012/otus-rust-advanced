@@ -18,7 +18,10 @@ extern "C" {
 }
 
 /// Типизированная обёртка: сериализуем аргументы и десериализуем ответ.
-async fn call<A: Serialize, R: for<'de> Deserialize<'de>>(cmd: &str, args: &A) -> Result<R, String> {
+async fn call<A: Serialize, R: for<'de> Deserialize<'de>>(
+    cmd: &str,
+    args: &A,
+) -> Result<R, String> {
     let args = serde_wasm_bindgen::to_value(args).map_err(|e| e.to_string())?;
     match invoke(cmd, args).await {
         Ok(v) => serde_wasm_bindgen::from_value(v).map_err(|e| e.to_string()),

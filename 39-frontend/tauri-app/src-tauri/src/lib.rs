@@ -58,7 +58,12 @@ async fn countdown<R: Runtime>(app: AppHandle<R>, from: u32) -> Result<(), Strin
 pub fn setup<R: Runtime>(builder: Builder<R>) -> Builder<R> {
     builder
         .manage(Notes::default())
-        .invoke_handler(tauri::generate_handler![greet, add_note, system_info, countdown])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            add_note,
+            system_info,
+            countdown
+        ])
 }
 
 pub fn run() {
@@ -88,18 +93,38 @@ mod tests {
 
     #[test]
     fn commands_through_ipc() {
-        let app = setup(mock_builder()).build(mock_context(noop_assets())).unwrap();
+        let app = setup(mock_builder())
+            .build(mock_context(noop_assets()))
+            .unwrap();
         let webview = tauri::WebviewWindowBuilder::new(&app, "main", Default::default())
             .build()
             .unwrap();
 
-        let r = get_ipc_response(&webview, request("greet", serde_json::json!({ "name": "OTUS" })));
-        assert_eq!(r.unwrap().deserialize::<String>().unwrap(), "Привет, OTUS! Ответ пришёл из Rust-процесса");
+        let r = get_ipc_response(
+            &webview,
+            request("greet", serde_json::json!({ "name": "OTUS" })),
+        );
+        assert_eq!(
+            r.unwrap().deserialize::<String>().unwrap(),
+            "Привет, OTUS! Ответ пришёл из Rust-процесса"
+        );
 
-        let r = get_ipc_response(&webview, request("add_note", serde_json::json!({ "text": "  " })));
-        assert_eq!(r.unwrap_err(), serde_json::json!("пустую заметку сохранить нельзя"));
+        let r = get_ipc_response(
+            &webview,
+            request("add_note", serde_json::json!({ "text": "  " })),
+        );
+        assert_eq!(
+            r.unwrap_err(),
+            serde_json::json!("пустую заметку сохранить нельзя")
+        );
 
-        let r = get_ipc_response(&webview, request("add_note", serde_json::json!({ "text": "wasm" })));
-        assert_eq!(r.unwrap().deserialize::<Vec<String>>().unwrap(), vec!["wasm"]);
+        let r = get_ipc_response(
+            &webview,
+            request("add_note", serde_json::json!({ "text": "wasm" })),
+        );
+        assert_eq!(
+            r.unwrap().deserialize::<Vec<String>>().unwrap(),
+            vec!["wasm"]
+        );
     }
 }

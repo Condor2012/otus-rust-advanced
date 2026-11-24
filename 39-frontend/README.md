@@ -1,6 +1,6 @@
 # Rust Frontend — демо к занятию
 
-WebAssembly, wasm-bindgen, Yew, Tauri. Проверено на Rust 1.97 (Linux x86_64):
+WebAssembly, wasm-bindgen, Yew, Tauri. Проверено на Rust 1.100 (Linux x86_64):
 wasm-bindgen 0.2.129, web-sys 0.3.106, Yew 0.23, trunk 0.22, Tauri 2.12, tauri-cli 2.12.
 
 ```

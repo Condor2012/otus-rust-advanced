@@ -66,10 +66,16 @@ pub struct WordCount {
 #[wasm_bindgen]
 pub fn top_words(text: &str, n: usize) -> Result<JsValue, JsError> {
     let mut map = std::collections::HashMap::<String, u32>::new();
-    for w in text.split(|c: char| !c.is_alphanumeric()).filter(|w| !w.is_empty()) {
+    for w in text
+        .split(|c: char| !c.is_alphanumeric())
+        .filter(|w| !w.is_empty())
+    {
         *map.entry(w.to_lowercase()).or_default() += 1;
     }
-    let mut v: Vec<WordCount> = map.into_iter().map(|(word, count)| WordCount { word, count }).collect();
+    let mut v: Vec<WordCount> = map
+        .into_iter()
+        .map(|(word, count)| WordCount { word, count })
+        .collect();
     v.sort_by(|a, b| b.count.cmp(&a.count).then(a.word.cmp(&b.word)));
     v.truncate(n);
     Ok(serde_wasm_bindgen::to_value(&v)?)
@@ -103,7 +109,10 @@ impl Counter {
 // ---------- 5. DOM через web-sys (только в браузере) ----------
 #[wasm_bindgen]
 pub fn render_list(container_id: &str, items: Vec<String>) -> Result<(), JsValue> {
-    let document = web_sys::window().ok_or("нет window")?.document().ok_or("нет document")?;
+    let document = web_sys::window()
+        .ok_or("нет window")?
+        .document()
+        .ok_or("нет document")?;
     let container = document
         .get_element_by_id(container_id)
         .ok_or_else(|| JsValue::from_str("нет контейнера"))?;
