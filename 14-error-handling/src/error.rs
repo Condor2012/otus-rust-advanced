@@ -40,7 +40,6 @@ impl From<LoginError> for GetDataError {
     }
 }
 
-
 impl From<DownloadError> for GetDataError {
     fn from(e: DownloadError) -> Self {
         GetDataError::Download(e)
