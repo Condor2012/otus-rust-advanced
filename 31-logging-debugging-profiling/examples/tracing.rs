@@ -13,7 +13,8 @@ fn main() {
     let subscriber = FmtSubscriber::builder()
         .with_max_level(Level::INFO)
         .finish();
-    tracing::subscriber::set_global_default(subscriber).expect("подписчик устанавливается один раз");
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("подписчик устанавливается один раз");
 
     process(42, 3);
     process(7, 0);
