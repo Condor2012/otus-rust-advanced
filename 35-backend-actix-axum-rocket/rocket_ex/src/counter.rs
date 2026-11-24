@@ -1,7 +1,7 @@
 use rocket::fairing::{Fairing, Info, Kind};
 use rocket::{Data, Request};
-use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 use std::sync::{Arc, Mutex};
 
 #[derive(Default, Clone)]

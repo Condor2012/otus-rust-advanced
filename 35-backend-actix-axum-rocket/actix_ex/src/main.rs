@@ -7,7 +7,7 @@ use crate::count::CountersTransform;
 use actix_web::body;
 use actix_web::http::StatusCode;
 use actix_web::web::{Data, Path};
-use actix_web::{dev::Service, web, App, HttpResponse, HttpServer};
+use actix_web::{App, HttpResponse, HttpServer, dev::Service, web};
 use error::CustomResult;
 use futures::StreamExt;
 use log::LevelFilter;

@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::future::{ready, Ready};
+use std::future::{Ready, ready};
 use std::sync::{Arc, Mutex};
 
 use actix_web::dev::{self, Service, ServiceRequest, Transform};

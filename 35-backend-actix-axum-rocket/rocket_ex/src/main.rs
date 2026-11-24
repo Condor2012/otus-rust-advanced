@@ -1,10 +1,10 @@
 use crate::counter::CounterMiddleware;
 use crate::error::CustomResult;
 use crate::mysq::Boards;
+use rocket::State;
 use rocket::fairing::AdHoc;
 use rocket::serde::json::Json;
 use rocket::serde::{Deserialize, Serialize};
-use rocket::State;
 
 mod counter;
 mod error;

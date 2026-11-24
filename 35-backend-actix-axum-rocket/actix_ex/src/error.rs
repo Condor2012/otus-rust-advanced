@@ -22,7 +22,7 @@ impl ResponseError for CustomError {
     }
 
     fn error_response(&self) -> HttpResponse<BoxBody> {
-        log::error!("Error: {}", self.to_string());
+        log::error!("Error: {self}");
         HttpResponse::build(self.status_code()).json(self)
     }
 }

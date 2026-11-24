@@ -133,8 +133,8 @@ async fn update_task(
     )
     .fetch_optional(&st.db)
     .await?
-        .map(Json)
-        .ok_or(AppError::NotFound)
+    .map(Json)
+    .ok_or(AppError::NotFound)
 }
 
 async fn delete_task(State(st): State<AppState>, Path(id): Path<i64>) -> AppResult<StatusCode> {
@@ -174,7 +174,7 @@ async fn main() -> anyhow::Result<()> {
     let url = "postgres://postgres:postgres@localhost:5432/shop";
     let db = PgPoolOptions::new()
         .max_connections(10)
-        .connect(&url)
+        .connect(url)
         .await?;
     sqlx::migrate!().run(&db).await?;
 

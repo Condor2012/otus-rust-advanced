@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
-use std::sync::{Mutex, Arc};
+use std::sync::{Arc, Mutex};
 
 use axum::extract::{Request, State};
 use axum::middleware::Next;
