@@ -5,10 +5,10 @@
 //! приходится задавать самим. Здесь — префиксом длины.
 //!
 
-//// | service_1 | --------> | service_2 |
-//// | Message   |          | Message   |
-////                REST API
-////             |   JSON   |
+// | service_1 | --------> | service_2 |
+// | Message   |           | Message   |
+//                REST API
+//             |   JSON   |
 
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
@@ -117,7 +117,9 @@ mod tests {
     #[tokio::test]
     async fn roundtrip_single_message() {
         let mut buf: Vec<u8> = Vec::new();
-        let msg = ClientMsg::Hello { nick: "alice".into() };
+        let msg = ClientMsg::Hello {
+            nick: "alice".into(),
+        };
         write_msg(&mut buf, &msg).await.unwrap();
 
         let mut cursor = std::io::Cursor::new(buf);
@@ -128,14 +130,38 @@ mod tests {
     #[tokio::test]
     async fn two_messages_in_one_buffer_keep_their_boundaries() {
         let mut buf: Vec<u8> = Vec::new();
-        write_msg(&mut buf, &ClientMsg::Text { body: "раз".into() }).await.unwrap();
-        write_msg(&mut buf, &ClientMsg::Text { body: "два".into() }).await.unwrap();
+        write_msg(
+            &mut buf,
+            &ClientMsg::Text {
+                body: "раз".into()
+            },
+        )
+        .await
+        .unwrap();
+        write_msg(
+            &mut buf,
+            &ClientMsg::Text {
+                body: "два".into()
+            },
+        )
+        .await
+        .unwrap();
 
         let mut cursor = std::io::Cursor::new(buf);
         let a: ClientMsg = read_msg(&mut cursor).await.unwrap();
         let b: ClientMsg = read_msg(&mut cursor).await.unwrap();
-        assert_eq!(a, ClientMsg::Text { body: "раз".into() });
-        assert_eq!(b, ClientMsg::Text { body: "два".into() });
+        assert_eq!(
+            a,
+            ClientMsg::Text {
+                body: "раз".into()
+            }
+        );
+        assert_eq!(
+            b,
+            ClientMsg::Text {
+                body: "два".into()
+            }
+        );
     }
 
     #[tokio::test]

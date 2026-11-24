@@ -11,7 +11,7 @@
 use anyhow::Context;
 use clap::Parser;
 #[allow(unused_imports)]
-use netchat_protocol::{read_msg, write_msg, ClientMsg, ProtoError, ServerMsg};
+use netchat_protocol::{ClientMsg, ProtoError, ServerMsg, read_msg, write_msg};
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::net::TcpStream;
 
@@ -44,7 +44,13 @@ async fn main() -> anyhow::Result<()> {
     let (net_read, mut net_write) = stream.into_split();
     let mut net_read = BufReader::new(net_read);
 
-    write_msg(&mut net_write, &ClientMsg::Hello { nick: args.nick.clone() }).await?;
+    write_msg(
+        &mut net_write,
+        &ClientMsg::Hello {
+            nick: args.nick.clone(),
+        },
+    )
+    .await?;
 
     let mut stdin = BufReader::new(tokio::io::stdin()).lines();
     println!("{HELP}\n");
@@ -93,7 +99,9 @@ fn parse_input(line: &str) -> Input {
         return Input::Nothing;
     }
     if !line.starts_with('/') {
-        return Input::Msg(ClientMsg::Text { body: line.to_owned() });
+        return Input::Msg(ClientMsg::Text {
+            body: line.to_owned(),
+        });
     }
     let mut parts = line.splitn(3, ' ');
     match parts.next().unwrap_or_default() {
@@ -102,7 +110,10 @@ fn parse_input(line: &str) -> Input {
         "/list" => Input::Msg(ClientMsg::ListUsers),
         "/w" | "/msg" => match (parts.next(), parts.next()) {
             (Some(to), Some(body)) if !to.is_empty() && !body.trim().is_empty() => {
-                Input::Msg(ClientMsg::Private { to: to.to_owned(), body: body.trim().to_owned() })
+                Input::Msg(ClientMsg::Private {
+                    to: to.to_owned(),
+                    body: body.trim().to_owned(),
+                })
             }
             _ => Input::Bad("использование: /w <ник> <текст>"),
         },
@@ -129,7 +140,10 @@ mod tests {
 
     #[test]
     fn plain_text_becomes_text_message() {
-        assert!(matches!(parse_input("привет"), Input::Msg(ClientMsg::Text { .. })));
+        assert!(matches!(
+            parse_input("привет"),
+            Input::Msg(ClientMsg::Text { .. })
+        ));
     }
 
     #[test]

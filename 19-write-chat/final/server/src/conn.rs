@@ -16,11 +16,12 @@ use std::net::SocketAddr;
 use std::time::Duration;
 
 #[allow(unused_imports)]
-use netchat_protocol::{normalize_nick, read_msg, write_msg, ClientMsg, ProtoError, ServerMsg};
+use netchat_protocol::{ClientMsg, ProtoError, ServerMsg, normalize_nick, read_msg, write_msg};
 use tokio::io::{BufReader, BufWriter};
 use tokio::net::TcpStream;
 #[allow(unused_imports)]
-use tokio::sync::mpsc; use tokio_util::sync::CancellationToken;
+use tokio::sync::mpsc;
+use tokio_util::sync::CancellationToken;
 #[allow(unused_imports)]
 use tracing::{debug, info, warn};
 
@@ -50,13 +51,17 @@ pub async fn handle(
         ClientMsg::Hello { nick } => match normalize_nick(&nick) {
             Some(nick) => nick,
             None => {
-                let err = ServerMsg::Error { text: "недопустимый ник".into() };
+                let err = ServerMsg::Error {
+                    text: "недопустимый ник".into(),
+                };
                 write_msg(&mut writer, &err).await?;
                 return Ok(());
             }
         },
         other => {
-            let err = ServerMsg::Error { text: format!("ожидался Hello, получено {other:?}") };
+            let err = ServerMsg::Error {
+                text: format!("ожидался Hello, получено {other:?}"),
+            };
             write_msg(&mut writer, &err).await?;
             return Ok(());
         }
@@ -75,9 +80,11 @@ pub async fn handle(
         let mut guard = room.lock().expect("поток заблокирован");
         guard.join(&nick, tx.clone())
     };
-    
+
     if !joined {
-        let err = ServerMsg::Error { text: "ник занят".into() };
+        let err = ServerMsg::Error {
+            text: "ник занят".into(),
+        };
         write_msg(&mut writer, &err).await?;
         return Ok(());
     }
@@ -104,9 +111,25 @@ pub async fn handle(
     // до `.await` ниже, вся future перестанет быть Send.
     {
         let lock = room.lock().expect("поток заблокирован");
-        let motd = format!("ник {}, на сервере {}, где {} пользователей", nick, addr, lock.len());
-        lock.send_to(&nick, ServerMsg::Welcome { nick: nick.clone(), motd });
-        lock.broadcast(&ServerMsg::System { text: format!("{nick} присоединился к чату") }, Some(&nick));
+        let motd = format!(
+            "ник {}, на сервере {}, где {} пользователей",
+            nick,
+            addr,
+            lock.len()
+        );
+        lock.send_to(
+            &nick,
+            ServerMsg::Welcome {
+                nick: nick.clone(),
+                motd,
+            },
+        );
+        lock.broadcast(
+            &ServerMsg::System {
+                text: format!("{nick} присоединился к чату"),
+            },
+            Some(&nick),
+        );
     }
 
     // --- 4. Основной цикл чтения -------------------------------------------
@@ -121,7 +144,12 @@ pub async fn handle(
     {
         let mut guard = room.lock().expect("поток заблокирован");
         guard.leave(&nick);
-        guard.broadcast(&ServerMsg::System { text: format!("{nick} вышел из чата") }, Some(&nick));
+        guard.broadcast(
+            &ServerMsg::System {
+                text: format!("{nick} вышел из чата"),
+            },
+            Some(&nick),
+        );
     }
     drop(tx);
     let _ = writer_task.await;
@@ -138,15 +166,13 @@ async fn read_loop(
     shutdown: &CancellationToken,
 ) -> anyhow::Result<()> {
     loop {
-        // TODO(шаг 4): обернуть чтение в `tokio::select!` с веткой
-        //   `_ = shutdown.cancelled() => { ... }`, чтобы соединение
-        //   отпускалось при остановке сервера. Пока просто читаем.
-        //
-        // Про cancel safety: `read_msg` НЕ cancel-safe — если её отменить
-        // посередине кадра, прочитанные байты потеряются. Обсуждаем на шаге 4,
-        // почему в нашем случае это допустимо.
-        let _ = shutdown;
-        let incoming = read_msg::<_, ClientMsg>(reader).await;
+        // `read_msg` не cancel-safe: при отмене посередине кадра уже прочитанные
+        // байты теряются. При остановке сервера соединение всё равно закрывается,
+        // поэтому здесь такая отмена допустима.
+        let incoming = tokio::select! {
+            _ = shutdown.cancelled() => return Ok(()),
+            incoming = read_msg::<_, ClientMsg>(reader) => incoming,
+        };
 
         match incoming {
             Ok(ClientMsg::Bye) => return Ok(()),
@@ -160,7 +186,10 @@ async fn read_loop(
                 }
                 let guard_room = room.lock().expect("поток заблокирован");
                 guard_room.broadcast(
-                    &ServerMsg::Chat { from: nick.to_owned(), body }, 
+                    &ServerMsg::Chat {
+                        from: nick.to_owned(),
+                        body,
+                    },
                     Some(nick),
                 );
             }
@@ -171,12 +200,17 @@ async fn read_loop(
                 let guard_room = room.lock().expect("поток заблокирован");
                 let approved = guard_room.send_to(
                     &to,
-                    ServerMsg::Chat { from: nick.to_owned(), body }
+                    ServerMsg::Chat {
+                        from: nick.to_owned(),
+                        body,
+                    },
                 );
                 if !approved {
                     guard_room.send_to(
-                        nick, 
-                        ServerMsg::Error { text: format!("Пользователь {to} сейчас не в чате") }
+                        nick,
+                        ServerMsg::Error {
+                            text: format!("Пользователь {to} сейчас не в чате"),
+                        },
                     );
                 }
             }
@@ -192,7 +226,12 @@ async fn read_loop(
                 // TODO(шаг 3): второй Hello — это ошибка клиента, но не повод
                 //   рвать соединение. Отвечаем ServerMsg::Error.
                 let guard_room = room.lock().expect("поток заблокирован");
-                guard_room.send_to(nick, ServerMsg::Error { text: "повторный Hello".into() });
+                guard_room.send_to(
+                    nick,
+                    ServerMsg::Error {
+                        text: "повторный Hello".into(),
+                    },
+                );
             }
 
             // Штатный уход клиента — это не ошибка сервера.

@@ -53,8 +53,8 @@ impl Room {
         // Подсказка: `UnboundedSender::send` возвращает Result. Что означает Err?
         match self.peers.get(nick) {
             Some(tx) => tx.send(msg).is_ok(),
-            None => false
-        } 
+            None => false,
+        }
     }
 
     /// Разослать всем, кроме `except` (обычно — самого отправителя).
@@ -64,7 +64,7 @@ impl Room {
             if Some(nick.as_str()) == except {
                 continue;
             }
-            
+
             let _ = tx.send(msg.clone());
         }
     }
@@ -72,12 +72,7 @@ impl Room {
     /// Ники всех участников, отсортированные (чтобы вывод был предсказуемым).
     pub fn users(&self) -> Vec<String> {
         // TODO(шаг 1)
-        let mut users = vec![];
-        for (nick, _) in &self.peers {
-            users.push(nick.clone());
-        }
-        users
-        // self.peers.keys().cloned().collect()
+        self.peers.keys().cloned().collect()
     }
 
     pub fn len(&self) -> usize {
@@ -118,7 +113,10 @@ mod tests {
         room.join("alice", a);
         room.join("bob", b);
 
-        let msg = ServerMsg::Chat { from: "alice".into(), body: "привет".into() };
+        let msg = ServerMsg::Chat {
+            from: "alice".into(),
+            body: "привет".into(),
+        };
         room.broadcast(&msg, Some("alice"));
 
         assert!(ra.try_recv().is_err());

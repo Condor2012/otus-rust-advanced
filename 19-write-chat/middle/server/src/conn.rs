@@ -16,7 +16,7 @@ use std::net::SocketAddr;
 use std::time::Duration;
 
 #[allow(unused_imports)]
-use netchat_protocol::{normalize_nick, read_msg, write_msg, ClientMsg, ProtoError, ServerMsg};
+use netchat_protocol::{ClientMsg, ProtoError, ServerMsg, normalize_nick, read_msg, write_msg};
 use tokio::io::{BufReader, BufWriter};
 use tokio::net::TcpStream;
 #[allow(unused_imports)]
@@ -51,13 +51,17 @@ pub async fn handle(
         ClientMsg::Hello { nick } => match normalize_nick(&nick) {
             Some(nick) => nick,
             None => {
-                let err = ServerMsg::Error { text: "недопустимый ник".into() };
+                let err = ServerMsg::Error {
+                    text: "недопустимый ник".into(),
+                };
                 write_msg(&mut writer, &err).await?;
                 return Ok(());
             }
         },
         other => {
-            let err = ServerMsg::Error { text: format!("ожидался Hello, получено {other:?}") };
+            let err = ServerMsg::Error {
+                text: format!("ожидался Hello, получено {other:?}"),
+            };
             write_msg(&mut writer, &err).await?;
             return Ok(());
         }
@@ -76,9 +80,11 @@ pub async fn handle(
         let mut guard = room.lock().expect("поток заблокирован");
         guard.join(&nick, tx.clone())
     };
-    
+
     if !joined {
-        let err = ServerMsg::Error { text: "ник занят".into() };
+        let err = ServerMsg::Error {
+            text: "ник занят".into(),
+        };
         write_msg(&mut writer, &err).await?;
         return Ok(());
     }
@@ -101,10 +107,29 @@ pub async fn handle(
     // --- 3b. Приветствие и объявление остальным ----------------------------
     // TODO(шаг 2): под локом отправить себе Welcome, остальным — System("... присоединился").
 
-    let lock = room.lock().expect("поток заблокирован");
-    let motd = format!("ник {}, на сервере {}, где {} пользователей", nick, addr, lock.len());
-    lock.send_to(&nick, ServerMsg::Welcome { nick: nick.clone(), motd: motd.clone() });
-    lock.broadcast(&ServerMsg::System { text: format!("{nick} присоеденился к чату") }, Some(&nick));
+    // MutexGuard не Send: завершаем блокировку до первого `.await` в read_loop.
+    {
+        let lock = room.lock().expect("поток заблокирован");
+        let motd = format!(
+            "ник {}, на сервере {}, где {} пользователей",
+            nick,
+            addr,
+            lock.len()
+        );
+        lock.send_to(
+            &nick,
+            ServerMsg::Welcome {
+                nick: nick.clone(),
+                motd,
+            },
+        );
+        lock.broadcast(
+            &ServerMsg::System {
+                text: format!("{nick} присоединился к чату"),
+            },
+            Some(&nick),
+        );
+    }
 
     // --- 4. Основной цикл чтения -------------------------------------------
     let loop_result = read_loop(&mut reader, &room, &nick, &shutdown).await;
@@ -118,7 +143,12 @@ pub async fn handle(
     {
         let mut guard = room.lock().expect("поток заблокирован");
         guard.leave(&nick);
-        guard.broadcast(&ServerMsg::System { text: format!("{nick} вышел из чата") }, Some(&nick));
+        guard.broadcast(
+            &ServerMsg::System {
+                text: format!("{nick} вышел из чата"),
+            },
+            Some(&nick),
+        );
     }
     drop(tx);
     let _ = writer_task.await;

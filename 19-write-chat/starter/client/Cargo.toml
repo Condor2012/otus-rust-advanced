@@ -9,7 +9,4 @@ name = "netchat-client"
 path = "src/main.rs"
 
 [dependencies]
-netchat-protocol = { workspace = true }
-tokio = { workspace = true }
-anyhow = { workspace = true }
-clap = { workspace = true }
+# Зависимости добавляются на занятии вместе с реализацией клиента.

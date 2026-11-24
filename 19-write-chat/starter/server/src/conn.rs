@@ -16,7 +16,7 @@ use std::net::SocketAddr;
 use std::time::Duration;
 
 #[allow(unused_imports)]
-use netchat_protocol::{normalize_nick, read_msg, write_msg, ClientMsg, ProtoError, ServerMsg};
+use netchat_protocol::{ClientMsg, ProtoError, ServerMsg, normalize_nick, read_msg, write_msg};
 use tokio::io::{BufReader, BufWriter};
 use tokio::net::TcpStream;
 #[allow(unused_imports)]
@@ -51,13 +51,17 @@ pub async fn handle(
         ClientMsg::Hello { nick } => match normalize_nick(&nick) {
             Some(nick) => nick,
             None => {
-                let err = ServerMsg::Error { text: "недопустимый ник".into() };
+                let err = ServerMsg::Error {
+                    text: "недопустимый ник".into(),
+                };
                 write_msg(&mut writer, &err).await?;
                 return Ok(());
             }
         },
         other => {
-            let err = ServerMsg::Error { text: format!("ожидался Hello, получено {other:?}") };
+            let err = ServerMsg::Error {
+                text: format!("ожидался Hello, получено {other:?}"),
+            };
             write_msg(&mut writer, &err).await?;
             return Ok(());
         }

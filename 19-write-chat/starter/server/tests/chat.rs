@@ -7,7 +7,7 @@
 
 use std::time::Duration;
 
-use netchat_protocol::{read_msg, write_msg, ClientMsg, ServerMsg};
+use netchat_protocol::{ClientMsg, ServerMsg, read_msg, write_msg};
 use tokio::io::BufReader;
 use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
 use tokio::net::{TcpListener, TcpStream};
@@ -29,7 +29,11 @@ impl Server {
         let addr = listener.local_addr().unwrap();
         let shutdown = CancellationToken::new();
         let handle = tokio::spawn(netchat_server::run(listener, shutdown.clone()));
-        Server { addr, shutdown, handle }
+        Server {
+            addr,
+            shutdown,
+            handle,
+        }
     }
 
     /// Требует, чтобы `run()` вернулся сам, и вернулся быстро.
@@ -65,7 +69,10 @@ impl Client {
     async fn raw(server: &Server) -> Self {
         let stream = TcpStream::connect(server.addr).await.unwrap();
         let (rd, wr) = stream.into_split();
-        Client { rd: BufReader::new(rd), wr }
+        Client {
+            rd: BufReader::new(rd),
+            wr,
+        }
     }
 
     async fn send(&mut self, msg: ClientMsg) {
@@ -91,10 +98,13 @@ impl Client {
 
     /// «Пришло ли что-нибудь прямо сейчас?» — для проверок «ничего не пришло».
     async fn try_recv_now(&mut self) -> Option<ServerMsg> {
-        tokio::time::timeout(Duration::from_millis(150), read_msg::<_, ServerMsg>(&mut self.rd))
-            .await
-            .ok()
-            .map(|r| r.unwrap())
+        tokio::time::timeout(
+            Duration::from_millis(150),
+            read_msg::<_, ServerMsg>(&mut self.rd),
+        )
+        .await
+        .ok()
+        .map(|r| r.unwrap())
     }
 }
 
@@ -105,12 +115,19 @@ async fn message_from_one_client_reaches_the_other() {
     let mut alice = Client::join(&server, "alice").await;
     let mut bob = Client::join(&server, "bob").await;
 
-    alice.send(ClientMsg::Text { body: "привет, чат".into() }).await;
+    alice
+        .send(ClientMsg::Text {
+            body: "привет, чат".into(),
+        })
+        .await;
 
     let got = bob.recv_meaningful().await;
     assert_eq!(
         got,
-        ServerMsg::Chat { from: "alice".into(), body: "привет, чат".into() }
+        ServerMsg::Chat {
+            from: "alice".into(),
+            body: "привет, чат".into()
+        }
     );
 
     server.stop().await;

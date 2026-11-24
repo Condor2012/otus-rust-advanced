@@ -100,7 +100,10 @@ mod tests {
         room.join("alice", a);
         room.join("bob", b);
 
-        let msg = ServerMsg::Chat { from: "alice".into(), body: "привет".into() };
+        let msg = ServerMsg::Chat {
+            from: "alice".into(),
+            body: "привет".into(),
+        };
         room.broadcast(&msg, Some("alice"));
 
         assert!(ra.try_recv().is_err());

@@ -12,19 +12,15 @@ use tracing::{info, warn};
 
 /// Принимать соединения, пока не сработает `shutdown`.
 ///
-/// ЦЕЛЬ шага 4: возврат из этой функции должен означать, что **все** задачи
-/// соединений уже завершились. Сейчас это не так.
+/// Возврат из этой функции означает, что **все** задачи соединений
+/// уже завершились.
 pub async fn run(listener: TcpListener, shutdown: CancellationToken) -> anyhow::Result<()> {
     let room = state::shared_room();
     let tracker = TaskTracker::new();
 
-    // TODO(шаг 4): let tracker = TaskTracker::new();
-
     info!(addr = %listener.local_addr()?, "сервер слушает");
 
     loop {
-        // TODO(шаг 4): завернуть accept в `tokio::select!` со второй веткой
-        //   `_ = shutdown.cancelled() => break`.
         tokio::select! {
             _ = shutdown.cancelled() => break,
             accepted = listener.accept() => {
@@ -41,7 +37,6 @@ pub async fn run(listener: TcpListener, shutdown: CancellationToken) -> anyhow::
 
                 let room = room.clone();
                 let shutdown = shutdown.clone();
-                // TODO(шаг 4): заменить tokio::spawn на tracker.spawn.
                 tracker.spawn(async move {
                     if let Err(e) = conn::handle(stream, addr, room, shutdown).await {
                         warn!(%addr, error = %e, "соединение завершилось с ошибкой");
@@ -51,9 +46,8 @@ pub async fn run(listener: TcpListener, shutdown: CancellationToken) -> anyhow::
         }
     }
 
-    // TODO(шаг 4): после выхода из цикла —
-      tracker.close();
-      tracker.wait().await;
-      info!("все соединения закрыты");
-      Ok(())
+    tracker.close();
+    tracker.wait().await;
+    info!("все соединения закрыты");
+    Ok(())
 }
